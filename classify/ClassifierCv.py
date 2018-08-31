@@ -17,7 +17,7 @@ from imblearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
 
 
-class MyLabelBinarizer(LabelBinarizer):
+class TwoLabelBinarizer(LabelBinarizer):
     """my label binarizer so that it would give same result in binary cases as in multiclass
     default binarizer turns out funny format when dealing with binary classification problem"""
     def transform(self, y):
@@ -35,13 +35,12 @@ class ClassifierCv(object):
         self.text=data_text
         self.labels=data_labels
 
-        if data_labels is not None: #should be none only if unpikcle
+        if data_labels is not None: #should be none only if unpickle
             #turn into binary labels
             self.labels_unique=[label for label in self.labels.unique()]
-            # self.labels_bin=label_binarize(self.labels, classes=self.labels.unique())
-            #for some reason in two classes label binareizer gievs different output
+            #for some reason in two classes label binareizer gives different output
             if len(self.labels_unique)==2:
-                my_label_binarizer=MyLabelBinarizer()
+                my_label_binarizer=TwoLabelBinarizer()
                 self.labels_bin=my_label_binarizer.fit_transform(self.labels)
             else:
                 self.labels_bin=label_binarize(self.labels, classes=self.labels_unique)
@@ -50,7 +49,7 @@ class ClassifierCv(object):
             self.labels_bin=None
 
         #metrics (recall, prec, f1)
-        self.metrics=None
+        self.metrics_per_class=None
         self.metrics_average=None
         #cv labels
         self.cv_labels_real=[]
@@ -72,9 +71,10 @@ class ClassifierCv(object):
         self.times_cv=[]
         self.time_train=[]
 
+
     def text_process(self, mess):
         """
-        Takes in a string of text, then performs the following:
+        Default text cleaning. Takes in a string of text, then performs the following:
         1. Remove all punctuation
         2. Remove all stopwords
         3. Returns a list of the cleaned text
@@ -90,11 +90,11 @@ class ClassifierCv(object):
 
 
     def prepare_pipeline(self, custom_pipeline=None):
-        """prepares pipelibe for model
+        """prepares pipeline for model
         - INPUT:
-            - custom_pipeline: if None, use default pipeline, else input list for sklearn Pipeline
+            - custom_pipeline: Pipeline, if None, use default pipeline, else input list for sklearn Pipeline
         -OUTPUT:
-            - sklearn pipeline"""
+            - initialises sklearn pipeline"""
 
         if custom_pipeline is None:
             self.text_clf = Pipeline([('vect', CountVectorizer(analyzer=self.text_process)),
@@ -106,14 +106,30 @@ class ClassifierCv(object):
         else:
             self.text_clf=Pipeline(custom_pipeline)
 
+
     def perform_random_search(self, param_grid, scoring='f1_weighted',num_cv=3, n_jobs=1):
-        """perform grid search to find best parameters"""
+        """perform grid search to find best parameters
+        -INPUT:
+            - param_grid:  dict or list of dictionaries, Dictionary with parameters names (string) as keys and lists
+             of parameter settings to try as values, or a list of such dictionaries, in which case the grids spanned
+             by each dictionary in the list are explored. This enables searching over any sequence of parameter settings.
+            - scoring: string from http://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
+            - num_cv: int, number of cross-validation iterations
+            - n_jobs: Number of jobs to run in parallel.
+
+        -OUTPUT:
+            - fitted gridsearch"""
 
         self.grid_search = GridSearchCV(self.text_clf, cv=num_cv, scoring=scoring, n_jobs=n_jobs, param_grid=param_grid)
         self.grid_search.fit(self.text, self.labels)
 
+
     def print_top_random_search(self, num_top=3):
-        """print grid search results"""
+        """print grid search results
+        -INPUT:
+            -num_top: int, number of top search results to print
+        -OUTPUT:
+            - printed top results"""
 
         results=self.grid_search.cv_results_
         for i in range(1, num_top + 1):
@@ -126,26 +142,33 @@ class ClassifierCv(object):
                 print("Parameters: {0}".format(results['params'][candidate]))
                 print("")
 
+
     def get_top_random_search_parameters(self, num):
-        """get parameters of top grid search """
+        """get parameters of top grid search
+         -INPUT:
+            - num: int, number of nth top rank parameters
+        -OUTPUT:
+            - dict of nth top parameters"""
 
         results = self.grid_search.cv_results_
         candidates = pd.np.flatnonzero(results['rank_test_score'] == num)
         for candidate in candidates:
             return results['params'][candidate]
 
+
     def prepare_cv(self, n_iter):
-        """initialises cross-validaton
+        """initialises stratified cross-validaton
         INPUT:
-            - n_iter: number of cross validation iterations
+            - n_iter: int, number of cross validation iterations
         OUTPUT:
             - prepares k-fold cross validation object"""
 
         self.kf = StratifiedKFold(n_splits=n_iter, shuffle=False)
         self.unique_labels = list(self.labels.unique())
 
+
     def train(self, roc_auc=True):
-        """train model
+        """train model, save metrics
         -INPUT:
             - roc_auc: boolean, should roc_auc (includeing precision -recall plot) metrics be saved
 
@@ -153,7 +176,7 @@ class ClassifierCv(object):
             - trained model with metrics"""
 
         #initialise metrics, remove previous training metrics
-        self.metrics = []
+        self.metrics_per_class = []
         self.metrics_average=[]
 
         self.fpr = dict()
@@ -206,8 +229,8 @@ class ClassifierCv(object):
 
             self.text_clf.fit(self.text[train], self.labels[train])
 
-            cv_time=time()-t0
-            self.times_cv.append(cv_time)
+            time_cv=time()-t0
+            self.times_cv.append(time_cv)
 
             labels_predict = self.text_clf.predict(list(self.text[test]))
             self.cv_labels_precited.append(labels_predict)
@@ -215,10 +238,10 @@ class ClassifierCv(object):
             labels_predict_label=labels_predict
 
             # per class metric, not average
-            self.metrics.append(precision_recall_fscore_support(self.labels[test],
-                                                           labels_predict_label,
-                                                           average=None,
-                                                           labels=self.unique_labels))
+            self.metrics_per_class.append(precision_recall_fscore_support(self.labels[test],
+                                                                          labels_predict_label,
+                                                                          average=None,
+                                                                          labels=self.unique_labels))
 
             self.metrics_average.append(precision_recall_fscore_support(self.labels[test],
                                                            labels_predict_label,
@@ -269,7 +292,7 @@ class ClassifierCv(object):
                 self.y_real["micro"].append(self.labels_bin[test].ravel())
                 self.y_proba["micro"].append(y_score.ravel())
 
-        self.metrics_df = pd.DataFrame(self.metrics)
+        self.metrics_df = pd.DataFrame(self.metrics_per_class)
         self.metrics_average_df= pd.DataFrame(self.metrics_average)
 
         #finally make model with all training data
@@ -277,6 +300,7 @@ class ClassifierCv(object):
         self.text_clf.fit(self.text, self.labels)
         time_train=time()-t0
         self.time_train.append(time_train)
+
 
     def predict(self, text_list, proba=False):
         """"predict labels based on trained classifier
@@ -299,8 +323,9 @@ class ClassifierCv(object):
     def get_one_metric_cv(self, metric_name, average=False):
         """"extract one metric from precision_recall_fscore_support to compare it between classes
         - INPUT:
-            - metric_name: name of the metric to be extracted
-            - average: True if data is average above all classes, else if per class: True
+            - metric_name: str, name of the metric to be extracted, on of the following:
+                'precision', 'recall', 'f1', 'support'
+            - average: boolean, True if data is average above all classes, else if per class: True
         - OUTPUT:
             - dataframe with metric from cross validation"""
 
@@ -317,6 +342,7 @@ class ClassifierCv(object):
         if average:
             return pd.DataFrame(self.metrics_average_df[ind].values.tolist()).transpose()
         return pd.DataFrame(self.metrics_df[ind].values.tolist(), columns=self.unique_labels).transpose()
+
 
     def make_metric_boxplot(self, metric, savefile=None, average=False, title=None, x_tick_rotation=45):
         """function to make metric boxplot to compare cross validation results between classes
@@ -353,12 +379,20 @@ class ClassifierCv(object):
         if savefile is not None:
             plt.savefig(savefile, bbox_inches='tight')
 
+
     def save_times(self, time_metrics_path, algorithm_name):
+        """save times from training
+        -INPUT:
+            -time_metrics_path: str, path where to save time files
+            - algorithm_name: str, name of the algorithm to add to file nime
+        -OUTPUT:
+            - save training times (from cv and final fit)"""
         df_time_cv=pd.DataFrame({'cv_times':self.times_cv})
         df_time_train=pd.DataFrame({'train_time':self.time_train})
 
         df_time_cv.to_csv(os.path.join(time_metrics_path, algorithm_name+'_time_cv.xlsx'), index=False)
         df_time_train.to_csv(os.path.join(time_metrics_path, algorithm_name+'_time_train.xlsx'), index=False)
+
 
     def train_save_metrics(self, pipeline, metric_name, algorithm_name, plot_path=None, metrics_path=None,
                            roc_auc_average=True, roc_auc=True, roc_auc_plot_cat_index=None, num_cv=10):
@@ -413,7 +447,9 @@ class ClassifierCv(object):
                                                                   category_index=roc_auc_plot_cat_index,
                                                                   average=roc_auc_average, title=algorithm_name)
         except:
+            print("Failed to generate roc_auc/precision_recall plot")
             pass
+
 
     def make_roc_auc_plot(self, savefile=None, category_index=0, average=False, title=""):
         """
@@ -498,6 +534,7 @@ class ClassifierCv(object):
 
         plt.show()
 
+
     def make_precision_recall_plot(self, average=True, category_index=None, title='', savefile=None):
         """make precision recall plot based on cv results
         - INPUT:
@@ -540,6 +577,7 @@ class ClassifierCv(object):
 
         plt.show()
 
+
     def make_average_auc_boxplot(self, title=None,savefile=None):
         """make boxplot of each cv
         -INPUT:
@@ -581,8 +619,14 @@ class ClassifierCv(object):
 
         plt.show()
 
+
     def make_confusion_matrix(self,use_evaluation_data=False):
-        """makes confusion matrix based on evaluation dataset"""
+        """makes confusion matrix based on evaluation dataset
+        -INPUT:
+            -use_evaluation_data: boolean, if True use evaluation data instead of training data
+        -OUTPUT:
+            - confusion matrix
+        """
         if use_evaluation_data:
             y_real = self.labels_eval_real
             y_pred = self.labels_eval_predicted
@@ -594,11 +638,21 @@ class ClassifierCv(object):
         cm = confusion_matrix(y_real, y_pred, labels=self.labels_unique)
         return cm
 
+
     def plot_confusion_matrix(self,cm=None, classes=None, normalize=False, title='Confusion matrix',
                               cmap=plt.cm.Blues, use_evaluation_data=False):
         """
         This function prints and plots the confusion matrix.
         Normalization can be applied by setting `normalize=True`.
+        -INPUT:
+            -cm: matrix, confusion matrix
+            -classes:  list, list of classes
+            -normalize: boolean, normalize by dividing cm col sums
+            -title: str, titel of plot
+            -cmap: cmap, colormap for plot
+            -use_evaluation_data: boolean, if true use evaluation data
+        -OUTPUT:
+            -plot of confusion matrix
         """
         if classes is None:
             classes=self.labels_unique
@@ -631,19 +685,33 @@ class ClassifierCv(object):
         plt.ylabel('True label')
         plt.xlabel('Predicted label')
 
+
     def predict_evaluation_set(self,texts_eval, labels_eval_real):
-        """predict labels of evaluation set"""
+        """predict labels of evaluation set
+        -INPUT:
+            -texts_eval: list, list of texts to be used for evaluation
+            -labels_eval_real: list, list of labels for texts_eval
+        -OUTPUT:
+            -initlize data for evaluation"""
         self.labels_eval_real=labels_eval_real
         self.labels_eval_predicted=self.text_clf.predict(list(texts_eval))
 
+
     def calc_evaluation_report(self, texts_eval,labels_eval_real, savefile=None):
-        """return evaluation metrics"""
+        """return evaluation metrics
+        -INPUT:
+            -texts_eval: list, list of texts to be used for evaluation
+            - labels_eval_real: list of labels to be used for evaluation
+            -savefile: str, path for saving metrics files
+        -OUTPUT:
+            - """
         self.predict_evaluation_set(texts_eval, labels_eval_real)
 
         if savefile is not None:
             eval_prec_rec_f1=precision_recall_fscore_support(self.labels_eval_real, self.labels_eval_predicted,
                                                              labels=self.labels_unique)
-            df_eval_metrics= pd.DataFrame(np.vstack(eval_prec_rec_f1),index=['precision', 'recall', 'f1', 'support'], columns=self.labels_unique)
+            df_eval_metrics= pd.DataFrame(np.vstack(eval_prec_rec_f1),index=['precision', 'recall', 'f1', 'support'],
+                                          columns=self.labels_unique)
 
             eval_prec_rec_f1_average = precision_recall_fscore_support(self.labels_eval_real, self.labels_eval_predicted,
                                                                        average="weighted", labels=self.labels_unique)
@@ -657,10 +725,16 @@ class ClassifierCv(object):
 
 
     def pickle(self, filename):
-        """save class instance to file"""
+        """save class instance to file
+        -INPUT:
+            -filename: str, filename to save ClassifierCv object
+        -OUTPUT:
+            -pickled ClassifierCv object
+            """
         f = open(filename, 'wb')
         pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
         f.close()
+
 
     @staticmethod
     def unpickle(filename):

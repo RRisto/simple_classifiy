@@ -92,7 +92,7 @@ class TestClassifierCv(unittest.TestCase):
         self.assertEqual(type(cf_cv.fpr), dict)
         self.assertEqual(type(cf_cv.metrics_average_df), pd.DataFrame)
         self.assertEqual(type(cf_cv.metrics_df), pd.DataFrame)
-        self.assertEqual(type(cf_cv.metrics), list)
+        self.assertEqual(type(cf_cv.metrics_per_class), list)
         self.assertEqual(type(cf_cv.metrics_average), list)
 
     def test_get_one_metric(self):

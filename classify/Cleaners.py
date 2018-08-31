@@ -74,16 +74,16 @@ class Cleaners(object):
         text=text.replace('\t', ' ')
 
         text=Text(text)
-        text.analyse('morphology')
-        lemmas=text.lemma
-        word_forms=text.form
+        # text.analyse('morphology')
+        lemmas=text.lemmas
+        word_forms=text.forms
         lemmatized_text=[]
 
         for i,lemma in enumerate(lemmas):
-            if word_forms[i][0]=='neg o' and 'olema' in lemmas[i]:
+            if word_forms[i]=='neg o' and 'olema' in lemmas[i]:
                 lemmatized_text.append('pole')
             else:
-                lemmatized_text.append(lemma[0])
+                lemmatized_text.append(lemma)
 
         if as_list is False:
             lemmatized_text= ' '.join(lemmatized_text)
@@ -102,10 +102,9 @@ class Cleaners(object):
              Returns
              -------
              list of strings (tokens)"""
-        if tokenizer=='esntltk':
+        if tokenizer=='estnltk':
             text = Text(text)
-            text.analyse('morphology')
-            return text.words.text
+            return text.word_texts
         #nltk tokenizer
         return word_tokenize(text)
 

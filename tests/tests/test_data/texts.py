@@ -9,5 +9,5 @@ class Texts:
                      'class':['pos','pos','pos','pos','pos','pos','pos','pos','pos','pos',
                               'neg','neg','neg','neg','neg', 'neg','neg','neg','neg','neg']})
 
-    df_lda=pd.DataFrame({'tokens':[['very','good'],['nice', 'and', 'some', 'other', 'text'],
-                                   ['good','text']]})
+    df_lda=[['very','good'],['nice', 'and', 'some', 'other', 'text'],
+                                   ['good','text']]

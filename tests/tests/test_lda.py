@@ -1,7 +1,5 @@
-import tempfile
-import unittest, os, shutil
+import unittest, os, shutil, tempfile
 
-import pandas as pd
 import numpy as np
 
 from classify.LDA import CustomLda
@@ -12,7 +10,7 @@ class TestLda(unittest.TestCase):
 
     def setUp(self):
 
-        self.text=Texts.df_lda['text_tokens']
+        self.text=Texts.df_lda
         #temp dir
         self.test_dir = tempfile.mkdtemp()
 
