@@ -1,4 +1,4 @@
-import tempfile, unittest, shutil, os, glob
+import tempfile, unittest, shutil, os
 
 import pandas as pd
 
@@ -46,7 +46,7 @@ class TestFasttextClassifier(unittest.TestCase):
         labels=ft_clf.predict(['very bad', 'very good'])
         self.assertTrue(all(labels== ['neg','pos']))
 
-    def test_predict_porba(self):
+    def test_predict_proba(self):
         ft_clf = FasttextClassifier(output=self.output)
         ft_clf.fit(self.texts, self.labels)
         probas=ft_clf.predict_proba(['very bad', 'very good'])
@@ -57,6 +57,6 @@ class TestFasttextClassifier(unittest.TestCase):
         ft_clf = FasttextClassifier(output=self.output)
         ft_clf.fit(self.texts, self.labels)
         loaded_ft_clf=FasttextClassifier()
-        loaded_ft_clf=loaded_ft_clf.loadpretrained(self.output+'.bin')
+        loaded_ft_clf.loadpretrained(self.output+'.bin')
         labels=loaded_ft_clf.predict(['very bad', 'very good'])
         self.assertTrue(all(labels == ['neg', 'pos']))

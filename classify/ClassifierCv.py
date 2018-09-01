@@ -53,7 +53,7 @@ class ClassifierCv(object):
         self.metrics_average=None
         #cv labels
         self.cv_labels_real=[]
-        self.cv_labels_precited=[]
+        self.cv_labels_predicted=[]
         #roc auc
         self.fpr = None
         self.tpr = None
@@ -107,7 +107,7 @@ class ClassifierCv(object):
             self.text_clf=Pipeline(custom_pipeline)
 
 
-    def perform_random_search(self, param_grid, scoring='f1_weighted',num_cv=3, n_jobs=1):
+    def perform_random_search(self, param_grid, scoring='f1_weighted',num_cv=3, n_jobs=1,**kwargs):
         """perform grid search to find best parameters
         -INPUT:
             - param_grid:  dict or list of dictionaries, Dictionary with parameters names (string) as keys and lists
@@ -120,7 +120,8 @@ class ClassifierCv(object):
         -OUTPUT:
             - fitted gridsearch"""
 
-        self.grid_search = GridSearchCV(self.text_clf, cv=num_cv, scoring=scoring, n_jobs=n_jobs, param_grid=param_grid)
+        self.grid_search = GridSearchCV(self.text_clf, cv=num_cv, scoring=scoring, n_jobs=n_jobs,
+                                        param_grid=param_grid, **kwargs)
         self.grid_search.fit(self.text, self.labels)
 
 
@@ -156,15 +157,110 @@ class ClassifierCv(object):
             return results['params'][candidate]
 
 
-    def prepare_cv(self, n_iter):
+    def prepare_cv(self, n_iter, shuffle=True, random_state=1):
         """initialises stratified cross-validaton
         INPUT:
             - n_iter: int, number of cross validation iterations
         OUTPUT:
             - prepares k-fold cross validation object"""
 
-        self.kf = StratifiedKFold(n_splits=n_iter, shuffle=False)
+        self.kf = StratifiedKFold(n_splits=n_iter, shuffle=shuffle, random_state=random_state)
         self.unique_labels = list(self.labels.unique())
+
+
+    def init_metrics_(self):
+        """
+        initialise metrics, remove previous training metrics
+        """
+        self.metrics_per_class = []
+        self.metrics_average = []
+
+        self.fpr = dict()
+        self.tpr = dict()
+        self.roc_auc = dict()
+
+        self.precision = dict()
+        self.recall = dict()
+        self.average_precision = dict()
+        self.y_proba = dict()
+        self.y_real = dict()
+        self.cv_labels_predicted = []
+        self.cv_labels_real = []
+
+        self.times_cv = []
+        self.time_train = []
+
+        for label_bin in range(len(self.labels_unique)):
+            self.fpr[label_bin] = []
+            self.tpr[label_bin] = []
+            self.roc_auc[label_bin] = []
+            self.precision[label_bin] = []
+            self.recall[label_bin] = []
+            self.average_precision[label_bin] = []
+            self.y_real[label_bin] = []
+            self.y_proba[label_bin] = []
+
+        self.fpr["micro"] = []
+        self.tpr["micro"] = []
+        self.roc_auc["micro"] = []
+        self.precision["micro"] = []
+        self.recall["micro"] = []
+        self.average_precision["micro"] = []
+        self.y_real["micro"] = []
+        self.y_proba["micro"] = []
+
+    def calc_store_rocauc_precrec_(self, classifier_rocauc, proba_method, train_ids, test_ids):
+        """calculate and store ROC AUC and precision recall curve metrics
+        -INPUT:
+            -classifier_roc_auc: sklearn OneVsRest classifier
+            -proba_method: string, classifier method name for predicting label probability
+            -train_ids: list of ids of samples used for training
+            -test_ids: list of ids of samples used for testing
+        -OUTPUT:
+            -stored metrics for ROC AUC and precision recall curve
+            """
+        y_score = None
+        # roc auc stuff
+        # some classifiers have method decision function, others predict proba to get scores
+        if proba_method == "decision_function":
+            y_score = classifier_rocauc.fit(self.text[train_ids], self.labels_bin[train_ids]).decision_function(self.text[test_ids])
+        elif proba_method == "predict_proba":
+            y_score = classifier_rocauc.fit(self.text[train_ids], self.labels_bin[train_ids]).predict_proba(
+                list(self.text[test_ids]))
+
+        if y_score is None:
+            return
+
+        for i in range(len(self.unique_labels)):
+            fpr_temp, tpr_temp, _ = roc_curve(self.labels_bin[test_ids][:, i], y_score[:, i])
+            self.fpr[i].append(fpr_temp)
+            self.tpr[i].append(tpr_temp)
+            self.roc_auc[i].append(auc(fpr_temp, tpr_temp))
+            # precison -recall metrics
+            precision_temp, recall_temp, _ = precision_recall_curve(self.labels_bin[test_ids][:, i],
+                                                                    y_score[:, i])
+            self.precision[i].append(precision_temp)
+            self.recall[i].append(recall_temp)
+            self.average_precision[i].append(average_precision_score(self.labels_bin[test_ids][:, i],
+                                                                     y_score[:, i]))
+            self.y_real[i].append(self.labels_bin[test_ids][:, i])
+            self.y_proba[i].append(y_score[:, i])
+
+        # Compute micro-average ROC curve and ROC area
+        fpr_micro_temp, tpr_micro_temp, _ = roc_curve(self.labels_bin[test_ids].ravel(), y_score.ravel())
+        self.fpr["micro"].append(fpr_micro_temp)
+        self.tpr["micro"].append(tpr_micro_temp)
+        self.roc_auc["micro"].append(auc(fpr_micro_temp, tpr_micro_temp))
+
+        # precision recall.  A "micro-average": quantifying score on all classes jointly
+        prec_micro_temp, recall_micro_temp, _ = precision_recall_curve(self.labels_bin[test_ids].ravel(),
+                                                                       y_score.ravel())
+        self.precision["micro"].append(prec_micro_temp)
+        self.recall["micro"].append(recall_micro_temp)
+        self.average_precision["micro"] = average_precision_score(self.labels_bin[test_ids], y_score,
+                                                                  average="micro")
+        self.y_real["micro"].append(self.labels_bin[test_ids].ravel())
+        self.y_proba["micro"].append(y_score.ravel())
 
 
     def train(self, roc_auc=True):
@@ -175,43 +271,7 @@ class ClassifierCv(object):
         _OUTPUT:
             - trained model with metrics"""
 
-        #initialise metrics, remove previous training metrics
-        self.metrics_per_class = []
-        self.metrics_average=[]
-
-        self.fpr = dict()
-        self.tpr = dict()
-        self.roc_auc = dict()
-
-        self.precision = dict()
-        self.recall = dict()
-        self.average_precision = dict()
-        self.y_proba=dict()
-        self.y_real=dict()
-        self.cv_labels_precited=[]
-        self.cv_labels_real=[]
-
-        self.times_cv=[]
-        self.time_train=[]
-
-        for label_bin in range(len(self.labels_unique)):
-            self.fpr[label_bin]=[]
-            self.tpr[label_bin]=[]
-            self.roc_auc[label_bin]=[]
-            self.precision[label_bin] = []
-            self.recall[label_bin] = []
-            self.average_precision[label_bin] = []
-            self.y_real[label_bin] = []
-            self.y_proba[label_bin] = []
-
-        self.fpr["micro"]=[]
-        self.tpr["micro"]=[]
-        self.roc_auc["micro"]=[]
-        self.precision["micro"] = []
-        self.recall["micro"] = []
-        self.average_precision["micro"] = []
-        self.y_real["micro"] = []
-        self.y_proba["micro"] = []
+        self.init_metrics_()
 
         classifier_rocauc = OneVsRestClassifier(self.text_clf)
 
@@ -233,7 +293,7 @@ class ClassifierCv(object):
             self.times_cv.append(time_cv)
 
             labels_predict = self.text_clf.predict(list(self.text[test]))
-            self.cv_labels_precited.append(labels_predict)
+            self.cv_labels_predicted.append(labels_predict)
             self.cv_labels_real.append(self.labels[test])
             labels_predict_label=labels_predict
 
@@ -249,48 +309,7 @@ class ClassifierCv(object):
                                                            labels=self.unique_labels))
 
             if roc_auc:
-                y_score=None
-                #roc auc stuff
-                #some classifiers have method decision function, others predict proba to get scores
-                if proba_method=="decision_function":
-                    y_score = classifier_rocauc.fit(self.text[train], self.labels_bin[train]).decision_function(self.text[test])
-                elif proba_method=="predict_proba":
-                    y_score = classifier_rocauc.fit(self.text[train], self.labels_bin[train]).predict_proba(
-                        list(self.text[test]))
-
-                if y_score is None:
-                    break
-
-                for i in range(len(self.unique_labels)):
-                    fpr_temp, tpr_temp, _ = roc_curve(self.labels_bin[test][:, i], y_score[:, i])
-                    self.fpr[i].append(fpr_temp)
-                    self.tpr[i].append(tpr_temp)
-                    self.roc_auc[i].append(auc(fpr_temp, tpr_temp))
-                    #precison -recall metrics
-                    precision_temp, recall_temp, _ = precision_recall_curve(self.labels_bin[test][:, i],
-                                                                        y_score[:, i])
-                    self.precision[i].append(precision_temp)
-                    self.recall[i].append(recall_temp)
-                    self.average_precision[i].append(average_precision_score(self.labels_bin[test][:, i],
-                                                                             y_score[:, i]))
-                    self.y_real[i].append(self.labels_bin[test][:, i])
-                    self.y_proba[i].append(y_score[:, i])
-
-                # Compute micro-average ROC curve and ROC area
-                fpr_micro_temp, tpr_micro_temp, _ = roc_curve(self.labels_bin[test].ravel(), y_score.ravel())
-                self.fpr["micro"].append(fpr_micro_temp)
-                self.tpr["micro"].append(tpr_micro_temp)
-                self.roc_auc["micro"].append(auc(fpr_micro_temp, tpr_micro_temp))
-
-                #precision recall.  A "micro-average": quantifying score on all classes jointly
-                prec_micro_temp, recall_micro_temp, _ = precision_recall_curve(self.labels_bin[test].ravel(),
-                                                                                y_score.ravel())
-                self.precision["micro"].append(prec_micro_temp)
-                self.recall["micro"].append(recall_micro_temp)
-                self.average_precision["micro"] = average_precision_score(self.labels_bin[test], y_score,
-                                                                     average="micro")
-                self.y_real["micro"].append(self.labels_bin[test].ravel())
-                self.y_proba["micro"].append(y_score.ravel())
+                self.calc_store_rocauc_precrec_(classifier_rocauc, proba_method, train, test)
 
         self.metrics_df = pd.DataFrame(self.metrics_per_class)
         self.metrics_average_df= pd.DataFrame(self.metrics_average)
@@ -308,7 +327,8 @@ class ClassifierCv(object):
             - text_list: list of texts which label will be predicted
             - proba: boolean, if true probability will be predicted
         - OUTPUT:
-            - dataframe with metric from cross validation"""
+            - dataframe with metric from cross validation
+            """
         if proba:
             probas=[]
             if callable(getattr(self.text_clf, "predict_proba", None)):
@@ -395,7 +415,7 @@ class ClassifierCv(object):
 
 
     def train_save_metrics(self, pipeline, metric_name, algorithm_name, plot_path=None, metrics_path=None,
-                           roc_auc_average=True, roc_auc=True, roc_auc_plot_cat_index=None, num_cv=10):
+                           roc_auc_average=True, roc_auc=True, roc_auc_plot_cat_index=None, num_cv=10, random_state=1):
         """wrapper function to train model quickly and less code
 
         -INPUT:
@@ -415,7 +435,7 @@ class ClassifierCv(object):
             - metrics files (per class and average)"""
 
         self.prepare_pipeline(pipeline)
-        self.prepare_cv(num_cv)
+        self.prepare_cv(num_cv, random_state=random_state)
         self.train(roc_auc=roc_auc)
         self.algorithm_name=algorithm_name
 
@@ -632,7 +652,7 @@ class ClassifierCv(object):
             y_pred = self.labels_eval_predicted
         else:
             labels_real=self.cv_labels_real
-            labels_predicted=self.cv_labels_precited
+            labels_predicted=self.cv_labels_predicted
             y_real = [item for sublist in labels_real for item in sublist]
             y_pred = [item for sublist in labels_predicted for item in sublist]
         cm = confusion_matrix(y_real, y_pred, labels=self.labels_unique)

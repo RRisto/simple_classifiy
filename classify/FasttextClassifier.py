@@ -1,3 +1,4 @@
+import pickle
 import sys, os
 import tempfile
 
@@ -57,8 +58,11 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
 
     def fit(self, x, y):
         """
-        Input: takes input file in format
-        returns classifier object
+        Input:
+            -x: list, array of texts for training
+            -y: list, array of labels for training
+        OUTPUT:
+            -returns classifier object
         """
         self.x=x
         self.y=y
@@ -91,9 +95,11 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
 
     def predict(self, texts, k_best=1):
         """
-        Input: Takes input test file in format if csvflag=True,
-        else input is pd.core.series.Seris or list
-        return results object
+        Input:
+            - texts: array, list of texts for predicting
+            - k_best: int, number of top labels returned
+        OUTPUT:
+            - list of predicted labels for texts
         """
         try:
             if (type(texts) is list or type(texts) is pd.core.series.Series):
@@ -110,8 +116,11 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
 
     def predict_proba(self, texts, k_best=1):
         """
-        Input: List of sentences if csvflag=False, else
-        return report of classification
+         Input:
+            - texts: array, list of texts for predicting
+            - k_best: int, number of top labels returned
+        OUTPUT:
+            - list of predicted labels for texts
         """
         try:
             if type(texts) is list or type(texts) is pd.core.series.Series:
@@ -148,7 +157,11 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
         return (self.result)
 
 
-    def loadpretrained(self, X):
-        """returns the model with pretrained weights"""
-        self.classifier = ft.load_model(X, label_prefix=self.lpr)
-
+    def loadpretrained(self, filename):
+        """
+        INPUT:
+            -filename: string, file from where to load pretrianed model
+        OUTPUT:
+            - initialises self.classifier
+            """
+        self.classifier = ft.load_model(filename, label_prefix=self.lpr)
