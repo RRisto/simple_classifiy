@@ -78,6 +78,7 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
         else:
             # just in case if new call is made for same object but input is not array
             self.original_array=None
+            df['class'] = '__label__' + df['class'].astype(str) + ' '
 
         temp_file=os.path.join(temp_dir, 'data_train.csv')
         df.to_csv(temp_file, index = False)
@@ -97,7 +98,9 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
         try:
             if (type(texts) is list or type(texts) is pd.core.series.Series):
                 labels=self.classifier.predict(texts, k=k_best)
-                result_temp=['__label__'+lbl[0]+' ' for lbl in labels]
+                #todo
+                # result_temp=['__label__'+lbl[0]+' ' for lbl in labels]
+                result_temp=[lbl[0] for lbl in labels]
                 self.result=np.array(result_temp)
         except:
             print("Error in input dataset.. please see if the file/list of sentences is of correct format")
@@ -105,15 +108,15 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
         return (self.result)
 
 
-    def predict_proba(self, test_file, csvflag=False, k_best=1):
+    def predict_proba(self, texts, k_best=1):
         """
         Input: List of sentences if csvflag=False, else
         return report of classification
         """
         try:
-            if csvflag == False and (type(test_file) is list or type(test_file) is pd.core.series.Series):
+            if type(texts) is list or type(texts) is pd.core.series.Series:
                 if self.original_array is not None: #oneVsRest classifier gave input case
-                    self.result = self.classifier.predict_proba(test_file, k=len(self.classes))
+                    self.result = self.classifier.predict_proba(texts, k=len(self.classes))
                     #now sort based on tuple first elements
                     result_temp=[sorted(lst, key=lambda x: x[0]) for lst in self.result]
                     result_mat=[]
@@ -125,9 +128,10 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
                         result_mat.append(temp)
                     self.result=np.array(result_mat)
                 else:
-                    self.result = self.classifier.predict_proba(test_file, k=len(self.classes_))
+                    self.result = self.classifier.predict_proba(texts, k=len(self.classes_))
                     # order lables based on lcasses order, turn into matrix
-                    classes_ordered = [label[:-1].replace(self.label_prefix, '') for label in self.classes_]
+                    # classes_ordered = [label[:-1].replace(self.label_prefix, '') for label in self.classes_]
+                    classes_ordered = self.classes_#[label[:-1].replace(self.label_prefix, '') for label in self.classes_]
                     result_mat = []
                     for row in self.result:
                         temp_row = []
@@ -137,23 +141,11 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
                         result_mat.append(temp_row)
                     self.result=np.array(result_mat)
 
-            if csvflag:
-                lines = open(test_file, "r").readlines()
-                sentences = [line.split(" , ")[1] for line in lines]
-                self.result = self.classifier.predict_proba(sentences, k_best)
         except:
             print("Error in input dataset.. please see if the file/list of sentences is of correct format")
             sys.exit(-1)
 
         return (self.result)
-
-    def getlabels(self):
-        """
-        Input: None
-        returns: Class labels in dataset
-        to do : check need of the this funcion
-        """
-        return (self.classifier.labels)
 
 
     def loadpretrained(self, X):

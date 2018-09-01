@@ -1,4 +1,5 @@
-import tempfile, unittest, shutil
+import tempfile, unittest, shutil, os, glob
+
 import pandas as pd
 
 from classify.FasttextClassifier import FasttextClassifier
@@ -17,6 +18,7 @@ class TestFasttextClassifier(unittest.TestCase):
 
         # temp dir
         self.test_dir = tempfile.mkdtemp()
+        self.output=output=os.path.join(self.test_dir, 'model.ft')
 
     def tearDown(self):
         # Remove the directory after the test
@@ -31,14 +33,30 @@ class TestFasttextClassifier(unittest.TestCase):
         self.assertEqual(ft_clf.epoch, 100)
 
     def test_fit(self):
-        ft_clf = FasttextClassifier()
+        ft_clf = FasttextClassifier(output=self.output)
         ft_clf.fit(self.texts, self.labels)
         self.assertEqual(ft_clf.classes_, list(self.labels.unique()))
         self.assertTrue(all(ft_clf.x==self.texts))
         self.assertTrue(all(ft_clf.y==self.labels))
+        self.assertTrue(os.path.isfile(self.output+'.bin'))
 
     def test_predict(self):
-        ft_clf = FasttextClassifier()
+        ft_clf = FasttextClassifier(output=self.output)
         ft_clf.fit(self.texts, self.labels)
         labels=ft_clf.predict(['very bad', 'very good'])
-        self.assertTrue(all(labels, ['']))
+        self.assertTrue(all(labels== ['neg','pos']))
+
+    def test_predict_porba(self):
+        ft_clf = FasttextClassifier(output=self.output)
+        ft_clf.fit(self.texts, self.labels)
+        probas=ft_clf.predict_proba(['very bad', 'very good'])
+        self.assertTrue(probas[0][0]<probas[0][1])
+        self.assertTrue(probas[1][0]>probas[1][1])
+
+    def test_load_pretrained(self):
+        ft_clf = FasttextClassifier(output=self.output)
+        ft_clf.fit(self.texts, self.labels)
+        loaded_ft_clf=FasttextClassifier()
+        loaded_ft_clf=loaded_ft_clf.loadpretrained(self.output+'.bin')
+        labels=loaded_ft_clf.predict(['very bad', 'very good'])
+        self.assertTrue(all(labels == ['neg', 'pos']))
