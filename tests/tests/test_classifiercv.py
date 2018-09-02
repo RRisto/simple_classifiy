@@ -141,3 +141,70 @@ class TestClassifierCv(unittest.TestCase):
         cf_cv.make_average_auc_boxplot(savefile=filename)
         self.assertTrue(os.path.isfile(filename))
 
+    def test_predict_labels(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                 metric, name,
+                                 self.test_dir,
+                                 self.test_dir)
+        labels=cf_cv.predict(['bad','good'])
+        self.assertTrue(all(labels==['neg','pos']))
+
+    def test_predict_labels_probas(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                 metric, name,
+                                 self.test_dir,
+                                 self.test_dir)
+        labels=cf_cv.predict(['bad','good'],proba=True)
+        self.assertTrue(labels.shape==(2,2))
+        self.assertEqual(type(labels), pd.DataFrame)
+        self.assertEqual(len(labels['pos'].values),2)
+        self.assertEqual(len(labels['neg'].values),2)
+        self.assertEqual(type(labels['neg'].values[0]),np.float64)
+
+    def test_pickle(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                 metric, name,
+                                 self.test_dir,
+                                 self.test_dir)
+        savefile=os.path.join(self.test_dir, 'clf_cv.cv')
+        cf_cv.pickle(savefile)
+        self.assertTrue(os.path.isfile(savefile))
+
+    def test_unpickle(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                 metric, name,
+                                 self.test_dir,
+                                 self.test_dir)
+        savefile=os.path.join(self.test_dir, 'clf_cv.cv')
+        cf_cv.pickle(savefile)
+        new_cf_cv=ClassifierCv.unpickle(savefile)
+
+        texts=['dont know that', 'nice good and bad']
+        predicted_labels_orig=cf_cv.predict(texts, proba=True)
+        predicted_labesl_new=new_cf_cv.predict(texts, proba=True)
+
+        self.assertTrue(all(predicted_labels_orig==predicted_labesl_new))
+
+
+
+

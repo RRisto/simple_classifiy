@@ -263,6 +263,22 @@ class ClassifierCv(object):
         self.y_proba["micro"].append(y_score.ravel())
 
 
+    def get_classifier_proba_method_(self, classifier):
+        """get label probability method of classifier. Some mehtods don't support predict_proba
+        -INPUT:
+            -classifier: sklearn classifier, which probability calculation method is to be detected
+        -OUTPUT:
+            -string with method name
+            """
+        proba_method = None
+
+        if callable(getattr(classifier, "predict_proba", None)):
+            proba_method = "predict_proba"
+        elif callable(getattr(classifier, "decision_function", None)):
+            proba_method = "decision_function"
+        return proba_method
+
+
     def train(self, roc_auc=True):
         """train model, save metrics
         -INPUT:
@@ -276,12 +292,7 @@ class ClassifierCv(object):
         classifier_rocauc = OneVsRestClassifier(self.text_clf)
 
         #check if classifier has predict_proba or decison_function method
-        proba_method=None
-
-        if  callable(getattr(classifier_rocauc, "predict_proba", None)):
-            proba_method="predict_proba"
-        elif callable(getattr(classifier_rocauc, "decision_function", None)):
-            proba_method="decision_function"
+        proba_method=self.get_classifier_proba_method_(classifier_rocauc)
 
         for train, test in self.kf.split(self.text, self.labels):
 
@@ -327,7 +338,7 @@ class ClassifierCv(object):
             - text_list: list of texts which label will be predicted
             - proba: boolean, if true probability will be predicted
         - OUTPUT:
-            - dataframe with metric from cross validation
+            - dataframe labels (with probas if proba True)
             """
         if proba:
             probas=[]
