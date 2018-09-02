@@ -1,8 +1,10 @@
+import itertools
+
 import numpy as np
+from scipy import interp
+
 from matplotlib import pyplot as plt, cm
 from sklearn.metrics import auc
-from scipy import interp
-import itertools
 
 
 def make_comparison_roc_auc_plot(classifier_instances, savefile=None, category_index=0, average=False, title=""):

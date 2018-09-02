@@ -8,7 +8,7 @@ from tests.test_data.texts import Texts
 
 class TestFasttextClassifier(unittest.TestCase):
     def setUp(self):
-        df = Texts.df
+        df = Texts.df_classification_train
 
         # countvectorizer needs Series type of data
         texts = pd.Series((text for text in df['text']))

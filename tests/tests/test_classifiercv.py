@@ -13,18 +13,17 @@ from tests.test_data.texts import Texts
 
 class TestClassifierCv(unittest.TestCase):
     def setUp(self):
-        df = Texts.df
+        df_train = Texts.df_classification_train
+        self.df_test=Texts.df_classification_test
 
         # countvectorizer needs Series type of data
-        texts = pd.Series((text for text in df['text']))
+        texts = pd.Series((text for text in df_train['text']))
         self.texts = texts
-        self.labels = df['class']
+        self.labels = df_train['class']
 
-        # temp dir
         self.test_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        # Remove the directory after the test
         shutil.rmtree(self.test_dir)
 
     def test_initalization(self):
@@ -140,6 +139,52 @@ class TestClassifierCv(unittest.TestCase):
         cf_cv.make_average_auc_boxplot(savefile=filename)
         self.assertTrue(os.path.isfile(filename))
 
+    def test_make_metric_boxplot(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                 metric, name,
+                                 self.test_dir,
+                                 self.test_dir)
+
+        filename = os.path.join(self.test_dir, name + '_metric_boxplot.png')
+        cf_cv.make_metric_boxplot(metric='f1',savefile=filename)
+        self.assertTrue(os.path.isfile(filename))
+
+    def test_plot_confusion_matrix(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                 metric, name,
+                                 self.test_dir,
+                                 self.test_dir)
+
+        filename = os.path.join(self.test_dir, name + '_confusion_matrix.png')
+        cf_cv.plot_confusion_matrix(savefile=filename)
+        self.assertTrue(os.path.isfile(filename))
+
+    def test_calc_evaluation_report(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05))],
+                                 metric, name,
+                                 self.test_dir,
+                                 self.test_dir)
+
+        filename = os.path.join(self.test_dir, '_eval_report')
+        cf_cv.calc_evaluation_report(self.df_test['text'], self.df_test['class'], savefile=filename)
+        self.assertTrue(os.path.isfile(filename + "_" + name + ".csv"))
+        self.assertTrue(os.path.isfile(filename + "_" + name + "_average.csv"))
+
     def test_predict_labels(self):
         cf_cv = ClassifierCv(self.labels, self.texts)
         name = 'MultinomialNB'
@@ -176,7 +221,7 @@ class TestClassifierCv(unittest.TestCase):
         metric = 'f1'
         cf_cv.train_save_metrics([('vect', CountVectorizer()),
                                   ('tfidf', TfidfTransformer()),
-                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                  ('clf', MultinomialNB(alpha=.05))],
                                  metric, name,
                                  self.test_dir,
                                  self.test_dir)
@@ -190,7 +235,7 @@ class TestClassifierCv(unittest.TestCase):
         metric = 'f1'
         cf_cv.train_save_metrics([('vect', CountVectorizer()),
                                   ('tfidf', TfidfTransformer()),
-                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                  ('clf', MultinomialNB(alpha=.05))],
                                  metric, name,
                                  self.test_dir,
                                  self.test_dir)

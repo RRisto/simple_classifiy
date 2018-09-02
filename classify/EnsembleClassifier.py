@@ -1,12 +1,14 @@
-from sklearn.base import BaseEstimator, ClassifierMixin
+import operator
 import numpy as np
 import pandas as pd
-import operator
+from sklearn.base import BaseEstimator, ClassifierMixin
 
 
 class EnsembleClassifier(BaseEstimator, ClassifierMixin):
     """
-    Ensemble classifier for scikit-learn estimators. Allows different pipelines for different estimators
+    Ensemble classifier for scikit-learn estimators. Allows different pipelines for different estimators.
+    Need for this separate class comes from FasttextClassifier, because it doesn't work with default sklearn
+    ensemble classifier
 
     Parameters
     ----------

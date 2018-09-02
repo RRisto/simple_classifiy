@@ -654,7 +654,7 @@ class ClassifierCv(object):
         return cm
 
     def plot_confusion_matrix(self, cm=None, classes=None, normalize=False, title='Confusion matrix',
-                              cmap=plt.cm.Blues, use_evaluation_data=False):
+                              cmap=plt.cm.Blues, use_evaluation_data=False, savefile=None):
         """
         This function prints and plots the confusion matrix.
         Normalization can be applied by setting `normalize=True`.
@@ -699,6 +699,9 @@ class ClassifierCv(object):
         plt.ylabel('True label')
         plt.xlabel('Predicted label')
 
+        if savefile is not None:
+            plt.savefig(savefile)
+
     def predict_evaluation_set(self, texts_eval, labels_eval_real):
         """predict labels of evaluation set
         -INPUT:
@@ -731,9 +734,9 @@ class ClassifierCv(object):
             df_eval_metrics_average = pd.DataFrame(np.vstack(eval_prec_rec_f1_average),
                                                    index=['precision', 'recall', 'f1', 'support'],
                                                    columns=['weighted'])
-            df_eval_metrics.to_csv(savefile + "_" + self.algorithm_name + ".csv", index=False)
-            df_eval_metrics_average.to_csv(savefile + "_" + self.algorithm_name + "_average.csv", index=False)
-        # return precision_recall_fscore_support(self.labels_eval_real, self.labels_eval_predicted,average=average)
+            df_eval_metrics.to_csv(self.algorithm_name + "_" +savefile +  ".csv", index=False)
+            df_eval_metrics_average.to_csv( self.algorithm_name +"_" + savefile + "_average.csv", index=False)
+
         return classification_report(self.labels_eval_real, self.labels_eval_predicted)
 
     def pickle(self, filename):
