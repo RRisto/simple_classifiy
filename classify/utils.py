@@ -22,7 +22,7 @@ def make_comparison_roc_auc_plot(classifier_instances, savefile=None, category_i
     tprs = []
     mean_fpr = np.linspace(0, 1, 100)
     plt.figure()
-    plt_title_category=''
+    plt_title_category = ''
 
     for classifier in classifier_instances:
         if average:
@@ -32,7 +32,8 @@ def make_comparison_roc_auc_plot(classifier_instances, savefile=None, category_i
 
             for j in range(classifier.kf.n_splits):
                 # First aggregate all false positive rates
-                all_fpr = np.unique(np.concatenate([classifier.fpr[i][j] for i in range(len(classifier.labels_unique))]))
+                all_fpr = np.unique(
+                    np.concatenate([classifier.fpr[i][j] for i in range(len(classifier.labels_unique))]))
 
                 # Then interpolate all ROC curves at this points
                 mean_tpr = np.zeros_like(all_fpr)
@@ -64,7 +65,7 @@ def make_comparison_roc_auc_plot(classifier_instances, savefile=None, category_i
         mean_tpr = np.mean(tprs, axis=0)
         mean_tpr[-1] = 1.0
         mean_auc = auc(mean_fpr, mean_tpr)
-        plt.plot(mean_fpr, mean_tpr, #color=next(colors),
+        plt.plot(mean_fpr, mean_tpr,  # color=next(colors),
                  label=r'%s mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (str(classifier.text_clf._final_estimator),
                                                                    mean_auc, std_auc), lw=2, alpha=.8)
 
@@ -74,7 +75,7 @@ def make_comparison_roc_auc_plot(classifier_instances, savefile=None, category_i
     plt.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r', label='Luck', alpha=.8)
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    ax=plt.gca()
+    ax = plt.gca()
     handles, labels = ax.get_legend_handles_labels()
     lgd = plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.2))
 
@@ -82,6 +83,7 @@ def make_comparison_roc_auc_plot(classifier_instances, savefile=None, category_i
         plt.savefig(savefile, bbox_inches='tight')
 
     plt.show()
+
 
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
@@ -93,7 +95,7 @@ def plot_confusion_matrix(cm, classes,
     """
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-    #     print("Normalized confusion matrix")
+    # print("Normalized confusion matrix")
     # else:
     #     print('Confusion matrix, without normalization')
 

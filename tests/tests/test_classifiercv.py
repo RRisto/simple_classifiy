@@ -12,16 +12,15 @@ from tests.test_data.texts import Texts
 
 
 class TestClassifierCv(unittest.TestCase):
-
     def setUp(self):
         df = Texts.df
 
         # countvectorizer needs Series type of data
         texts = pd.Series((text for text in df['text']))
         self.texts = texts
-        self.labels=df['class']
+        self.labels = df['class']
 
-        #temp dir
+        # temp dir
         self.test_dir = tempfile.mkdtemp()
 
     def tearDown(self):
@@ -32,16 +31,16 @@ class TestClassifierCv(unittest.TestCase):
         cf_cv = ClassifierCv(self.labels, self.texts)
         self.assertEqual(type(cf_cv.labels), pd.core.series.Series)
         self.assertEqual(type(cf_cv.labels_bin), np.ndarray)
-        self.assertEqual(len(cf_cv.labels_unique),2)
-        self.assertEqual(type(cf_cv.text),pd.core.series.Series)
-        self.assertGreater(len(cf_cv.text),2)
+        self.assertEqual(len(cf_cv.labels_unique), 2)
+        self.assertEqual(type(cf_cv.text), pd.core.series.Series)
+        self.assertGreater(len(cf_cv.text), 2)
 
     def test_prepare_pipeline(self):
         cf_cv = ClassifierCv(self.labels, self.texts)
-        pipeline=[('tfidf', TfidfTransformer()),
-                  ('clf', SGDClassifier(loss='hinge', penalty='l2',
-                                        alpha=1e-3, random_state=42,
-                                        max_iter=5, tol=None)),]
+        pipeline = [('tfidf', TfidfTransformer()),
+                    ('clf', SGDClassifier(loss='hinge', penalty='l2',
+                                          alpha=1e-3, random_state=42,
+                                          max_iter=5, tol=None)), ]
         cf_cv.prepare_pipeline(pipeline)
         self.assertEqual(cf_cv.text_clf._final_estimator.loss, 'hinge')
         self.assertEqual(cf_cv.text_clf._final_estimator.max_iter, 5)
@@ -58,7 +57,7 @@ class TestClassifierCv(unittest.TestCase):
 
         cf_cv.perform_random_search(param_dist)
 
-        params=cf_cv.get_top_random_search_parameters(1)
+        params = cf_cv.get_top_random_search_parameters(1)
         self.assertEqual(type(params), dict)
         self.assertEqual(len(params), 1)
 
@@ -68,13 +67,13 @@ class TestClassifierCv(unittest.TestCase):
                                 ('tfidf', TfidfTransformer()),
                                 ('crf', MultinomialNB())])
         cf_cv.prepare_cv(3)
-        self.assertEqual(cf_cv.kf.n_splits,3)
+        self.assertEqual(cf_cv.kf.n_splits, 3)
         self.assertIsNotNone(cf_cv.unique_labels)
 
     def test_train_save_metrics(self):
         cf_cv = ClassifierCv(self.labels, self.texts)
-        name='MultinomialNB'
-        metric='f1'
+        name = 'MultinomialNB'
+        metric = 'f1'
         cf_cv.train_save_metrics([('vect', CountVectorizer()),
                                   ('tfidf', TfidfTransformer()),
                                   ('clf', MultinomialNB(alpha=.05)), ],
@@ -82,11 +81,11 @@ class TestClassifierCv(unittest.TestCase):
                                  self.test_dir,
                                  self.test_dir)
 
-        self.assertTrue(os.path.isfile(os.path.join(self.test_dir,name+'_'+metric+'.png')))
-        self.assertTrue(os.path.isfile(os.path.join(self.test_dir,name+'ROC_AUC.png')))
-        self.assertTrue(os.path.isfile(os.path.join(self.test_dir,name+'prec_recall.png')))
-        self.assertTrue(os.path.isfile(os.path.join(self.test_dir,name+'.xlsx')))
-        self.assertTrue(os.path.isfile(os.path.join(self.test_dir,name+'_average.xlsx')))
+        self.assertTrue(os.path.isfile(os.path.join(self.test_dir, name + '_' + metric + '.png')))
+        self.assertTrue(os.path.isfile(os.path.join(self.test_dir, name + 'ROC_AUC.png')))
+        self.assertTrue(os.path.isfile(os.path.join(self.test_dir, name + 'prec_recall.png')))
+        self.assertTrue(os.path.isfile(os.path.join(self.test_dir, name + '.xlsx')))
+        self.assertTrue(os.path.isfile(os.path.join(self.test_dir, name + '_average.xlsx')))
         self.assertEqual(type(cf_cv.roc_auc), dict)
         self.assertEqual(type(cf_cv.tpr), dict)
         self.assertEqual(type(cf_cv.fpr), dict)
@@ -106,10 +105,10 @@ class TestClassifierCv(unittest.TestCase):
                                  self.test_dir,
                                  self.test_dir)
 
-        f1=cf_cv.get_one_metric_cv('f1')
-        precision=cf_cv.get_one_metric_cv('precision')
-        recall=cf_cv.get_one_metric_cv('recall')
-        support=cf_cv.get_one_metric_cv('support')
+        f1 = cf_cv.get_one_metric_cv('f1')
+        precision = cf_cv.get_one_metric_cv('precision')
+        recall = cf_cv.get_one_metric_cv('recall')
+        support = cf_cv.get_one_metric_cv('support')
 
         f1_average = cf_cv.get_one_metric_cv('f1', average=True)
         precision_average = cf_cv.get_one_metric_cv('precision', average=True)
@@ -137,7 +136,7 @@ class TestClassifierCv(unittest.TestCase):
                                  self.test_dir,
                                  self.test_dir)
 
-        filename=os.path.join(self.test_dir,name+'roc_auc_boxplot.png')
+        filename = os.path.join(self.test_dir, name + 'roc_auc_boxplot.png')
         cf_cv.make_average_auc_boxplot(savefile=filename)
         self.assertTrue(os.path.isfile(filename))
 
@@ -151,8 +150,8 @@ class TestClassifierCv(unittest.TestCase):
                                  metric, name,
                                  self.test_dir,
                                  self.test_dir)
-        labels=cf_cv.predict(['bad','good'])
-        self.assertTrue(all(labels==['neg','pos']))
+        labels = cf_cv.predict(['bad', 'good'])
+        self.assertTrue(all(labels == ['neg', 'pos']))
 
     def test_predict_labels_probas(self):
         cf_cv = ClassifierCv(self.labels, self.texts)
@@ -164,12 +163,12 @@ class TestClassifierCv(unittest.TestCase):
                                  metric, name,
                                  self.test_dir,
                                  self.test_dir)
-        labels=cf_cv.predict(['bad','good'],proba=True)
-        self.assertTrue(labels.shape==(2,2))
+        labels = cf_cv.predict(['bad', 'good'], proba=True)
+        self.assertTrue(labels.shape == (2, 2))
         self.assertEqual(type(labels), pd.DataFrame)
-        self.assertEqual(len(labels['pos'].values),2)
-        self.assertEqual(len(labels['neg'].values),2)
-        self.assertEqual(type(labels['neg'].values[0]),np.float64)
+        self.assertEqual(len(labels['pos'].values), 2)
+        self.assertEqual(len(labels['neg'].values), 2)
+        self.assertEqual(type(labels['neg'].values[0]), np.float64)
 
     def test_pickle(self):
         cf_cv = ClassifierCv(self.labels, self.texts)
@@ -181,7 +180,7 @@ class TestClassifierCv(unittest.TestCase):
                                  metric, name,
                                  self.test_dir,
                                  self.test_dir)
-        savefile=os.path.join(self.test_dir, 'clf_cv.cv')
+        savefile = os.path.join(self.test_dir, 'clf_cv.cv')
         cf_cv.pickle(savefile)
         self.assertTrue(os.path.isfile(savefile))
 
@@ -195,16 +194,12 @@ class TestClassifierCv(unittest.TestCase):
                                  metric, name,
                                  self.test_dir,
                                  self.test_dir)
-        savefile=os.path.join(self.test_dir, 'clf_cv.cv')
+        savefile = os.path.join(self.test_dir, 'clf_cv.cv')
         cf_cv.pickle(savefile)
-        new_cf_cv=ClassifierCv.unpickle(savefile)
+        new_cf_cv = ClassifierCv.unpickle(savefile)
 
-        texts=['dont know that', 'nice good and bad']
-        predicted_labels_orig=cf_cv.predict(texts, proba=True)
-        predicted_labesl_new=new_cf_cv.predict(texts, proba=True)
+        texts = ['dont know that', 'nice good and bad']
+        predicted_labels_orig = cf_cv.predict(texts, proba=True)
+        predicted_labesl_new = new_cf_cv.predict(texts, proba=True)
 
-        self.assertTrue(all(predicted_labels_orig==predicted_labesl_new))
-
-
-
-
+        self.assertTrue(all(predicted_labels_orig == predicted_labesl_new))

@@ -17,7 +17,7 @@ class CustomLda(object):
         self.num_topics = None
         self.iterations = None
         self.random_state = None
-        self.dictionary=dictionary
+        self.dictionary = dictionary
         # if dictionary is not None:
         #     self.dictionary = dictionary
         if self.data is not None:

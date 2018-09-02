@@ -7,11 +7,9 @@ from tests.test_data.texts import Texts
 
 
 class TestLda(unittest.TestCase):
-
     def setUp(self):
-
-        self.text=Texts.df_lda
-        #temp dir
+        self.text = Texts.df_lda
+        # temp dir
         self.test_dir = tempfile.mkdtemp()
 
     def tearDown(self):
@@ -29,34 +27,34 @@ class TestLda(unittest.TestCase):
     def test_train(self):
         lda = CustomLda(self.text)
         lda.train(2)
-        self.assertEqual(lda.num_topics,2)
+        self.assertEqual(lda.num_topics, 2)
 
     def test_get_topic(self):
         lda = CustomLda(self.text)
         lda.train(2)
-        topics=lda.get_topics(2)
+        topics = lda.get_topics(2)
         self.assertEqual(type(topics), list)
         self.assertGreater(len(topics), 1)
 
     def test_get_topic_terms(self):
         lda = CustomLda(self.text)
         lda.train(2)
-        topics=lda.get_topic_terms(1)
+        topics = lda.get_topic_terms(1)
         self.assertEqual(type(topics), list)
         self.assertGreater(len(topics), 1)
 
     def test_get_perplexity(self):
         lda = CustomLda(self.text)
         lda.train(2)
-        perp=lda.get_preplexity()
+        perp = lda.get_preplexity()
         self.assertEqual(type(perp), np.float64)
 
     def test_save_ldavis(self):
         lda = CustomLda(self.text)
         lda.train(2)
-        filename=os.path.join(self.test_dir, 'test_ldavis.html')
+        filename = os.path.join(self.test_dir, 'test_ldavis.html')
         lda.save_ldavis(filename)
-        self.assertTrue(os.path.isfile(filename) )
+        self.assertTrue(os.path.isfile(filename))
 
     def test_save_lda(self):
         lda = CustomLda(self.text)
@@ -70,7 +68,7 @@ class TestLda(unittest.TestCase):
         lda.train(2)
         filename = os.path.join(self.test_dir, 'model.pickle')
         lda.pickle(filename)
-        lda2=CustomLda().unpickle(filename)
+        lda2 = CustomLda().unpickle(filename)
         self.assertEqual(lda.corpus, lda2.corpus)
         self.assertEqual(lda.data, lda2.data)
         self.assertEqual(lda.dictionary, lda2.dictionary)

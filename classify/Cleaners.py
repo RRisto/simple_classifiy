@@ -10,28 +10,27 @@ class Cleaners(object):
 
     def __init__(self, stopwords=None):
         if isinstance(stopwords, list):
-            self.stopwords=stopwords
-        elif  isinstance(stopwords, str):
+            self.stopwords = stopwords
+        elif isinstance(stopwords, str):
             self._load_stopwords(self.stopwords)
         else:
-            self.stopwords=None
+            self.stopwords = None
 
     def _load_stopwords(self, filename):
         """loads stopwords from file and clean them to list"""
         with open(filename) as file:
-            stopwords=file.readlines()
+            stopwords = file.readlines()
 
-        stopwords_list=[]
+        stopwords_list = []
         for line in stopwords:
             stopwords_list.extend(line.strip().split(','))
 
-        #remove duplicates
-        stopwords_list=list(set(stopwords_list))
+        # remove duplicates
+        stopwords_list = list(set(stopwords_list))
         stopwords_list.remove('')
-        stopwords_list=[stopword.strip() for stopword in stopwords_list]
-        self.stopwords=filename
-        self.stopwords= stopwords_list
-
+        stopwords_list = [stopword.strip() for stopword in stopwords_list]
+        self.stopwords = filename
+        self.stopwords = stopwords_list
 
     def stem(self, text, lang, as_list=False):
         """stems text using porter stemmer from nltk
@@ -48,9 +47,9 @@ class Cleaners(object):
                 """
         stemmer = SnowballStemmer(lang)
         if type(text) is not list:
-            text=text.split(' ')
+            text = text.split(' ')
 
-        stemmed_text=[]
+        stemmed_text = []
         for word in text:
             stemmed_text.append(stemmer.stem(word))
 
@@ -69,27 +68,26 @@ class Cleaners(object):
         string / list of lemmatized text
         """
 
-        #needed for Text to work, otherwise after newline/tab no text is analyzed
-        text=text.replace('\n', ' ')
-        text=text.replace('\t', ' ')
+        # needed for Text to work, otherwise after newline/tab no text is analyzed
+        text = text.replace('\n', ' ')
+        text = text.replace('\t', ' ')
 
-        text=Text(text)
+        text = Text(text)
         # text.analyse('morphology')
-        lemmas=text.lemmas
-        word_forms=text.forms
-        lemmatized_text=[]
+        lemmas = text.lemmas
+        word_forms = text.forms
+        lemmatized_text = []
 
-        for i,lemma in enumerate(lemmas):
-            if word_forms[i]=='neg o' and 'olema' in lemmas[i]:
+        for i, lemma in enumerate(lemmas):
+            if word_forms[i] == 'neg o' and 'olema' in lemmas[i]:
                 lemmatized_text.append('pole')
             else:
                 lemmatized_text.append(lemma)
 
         if as_list is False:
-            lemmatized_text= ' '.join(lemmatized_text)
+            lemmatized_text = ' '.join(lemmatized_text)
 
         return lemmatized_text
-
 
     def tokenize(self, text, tokenizer='estnltk'):
         """tokenize text using Estnltk or nltk
@@ -102,12 +100,11 @@ class Cleaners(object):
              Returns
              -------
              list of strings (tokens)"""
-        if tokenizer=='estnltk':
+        if tokenizer == 'estnltk':
             text = Text(text)
             return text.word_texts
-        #nltk tokenizer
+        # nltk tokenizer
         return word_tokenize(text)
-
 
     def remove_stopwords(self, tokens, stopwords=None, return_string=False, min_len_tokens_kept=3):
         """remove stopwords from token list
@@ -124,9 +121,9 @@ class Cleaners(object):
          list/string of tokens without stopwords"""
 
         if stopwords is None:
-            stopwords=self.stopwords
+            stopwords = self.stopwords
 
-        result=[token for token in tokens if token not in stopwords and len(token)>=min_len_tokens_kept]
+        result = [token for token in tokens if token not in stopwords and len(token) >= min_len_tokens_kept]
 
         if return_string:
             return ' '.join(result)
@@ -146,7 +143,6 @@ class Cleaners(object):
 
         return text.lower()
 
-
     def remove_punctuation(self, text, custom_punctutation=None, replace_with=" "):
         """remove punctuation from text
 
@@ -163,10 +159,10 @@ class Cleaners(object):
         -------
         string of text without punctutation """
 
-        punctuation=string.punctuation
+        punctuation = string.punctuation
 
         if custom_punctutation is not None:
-            punctuation=punctuation+custom_punctutation
+            punctuation = punctuation + custom_punctutation
 
         return "".join(char if char not in punctuation else replace_with for char in text)
 
@@ -182,7 +178,7 @@ class Cleaners(object):
         -------
         string of text without excess space
         """
-        return re.sub(' +',' ', text)
+        return re.sub(' +', ' ', text)
 
     def replace_regex_pattern(self, pattern, text, replace=" ", escape_regex=False):
         """replaces regex patter in text with replace
@@ -202,7 +198,7 @@ class Cleaners(object):
         else:
             regex_pattern = re.compile(pattern)
         if type(text) is list:
-            result=[]
+            result = []
             for el in text:
                 result.append(re.sub(regex_pattern, replace, str(el)))
             return result
@@ -226,4 +222,3 @@ class Cleaners(object):
         for strng in string_list:
             text = text.replace(strng, replace)
         return text
-

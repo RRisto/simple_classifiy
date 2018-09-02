@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import operator
 
+
 class EnsembleClassifier(BaseEstimator, ClassifierMixin):
     """
     Ensemble classifier for scikit-learn estimators. Allows different pipelines for different estimators
@@ -18,6 +19,7 @@ class EnsembleClassifier(BaseEstimator, ClassifierMixin):
         will be used to determine the most confident class label.
 
     """
+
     def __init__(self, clfs, weights=None):
         self.clfs = clfs
         self.weights = weights
@@ -56,13 +58,13 @@ class EnsembleClassifier(BaseEstimator, ClassifierMixin):
         self.classes_ = np.asarray([clf.predict(X) for clf in self.clfs])
         if self.weights:
             avg = self.predict_proba(X)
-            unique_labels=self.clfs[0].classes_
+            unique_labels = self.clfs[0].classes_
 
             maj = np.apply_along_axis(lambda x: max(enumerate(x), key=operator.itemgetter(1))[0], axis=1, arr=avg)
-            maj=[unique_labels[i] for i in maj]#get labels
+            maj = [unique_labels[i] for i in maj]  # get labels
         else:
             # maj = np.asarray([np.argmax(np.bincount(self.classes_[:,c])) for c in range(self.classes_.shape[1])])
-            maj = np.asarray([pd.value_counts(self.classes_[:,c]).idxmax() for c in range(self.classes_.shape[1])])
+            maj = np.asarray([pd.value_counts(self.classes_[:, c]).idxmax() for c in range(self.classes_.shape[1])])
 
         return maj
 
