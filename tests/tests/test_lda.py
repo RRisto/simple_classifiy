@@ -9,11 +9,9 @@ from tests.test_data.texts import Texts
 class TestLda(unittest.TestCase):
     def setUp(self):
         self.text = Texts.df_lda
-        # temp dir
         self.test_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        # Remove the directory after the test
         shutil.rmtree(self.test_dir)
 
     def test_lda_init(self):

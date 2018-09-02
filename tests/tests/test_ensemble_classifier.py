@@ -5,15 +5,12 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.svm import LinearSVC
 from imblearn.pipeline import Pipeline
 
 from classify.FasttextClassifier import FasttextClassifier
 from classify.ClassifierCv import ClassifierCv
 from classify.EnsembleClassifier import EnsembleClassifier
 from tests.test_data.texts import Texts
-
-
 
 
 class TestEnsembleClassifier(unittest.TestCase):

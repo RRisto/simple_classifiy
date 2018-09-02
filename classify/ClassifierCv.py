@@ -734,8 +734,8 @@ class ClassifierCv(object):
             df_eval_metrics_average = pd.DataFrame(np.vstack(eval_prec_rec_f1_average),
                                                    index=['precision', 'recall', 'f1', 'support'],
                                                    columns=['weighted'])
-            df_eval_metrics.to_csv(self.algorithm_name + "_" +savefile +  ".csv", index=False)
-            df_eval_metrics_average.to_csv( self.algorithm_name +"_" + savefile + "_average.csv", index=False)
+            df_eval_metrics.to_csv(savefile +"_"+ self.algorithm_name +  ".csv", index=False)
+            df_eval_metrics_average.to_csv(savefile + "_"+self.algorithm_name + "_average.csv", index=False)
 
         return classification_report(self.labels_eval_real, self.labels_eval_predicted)
 
