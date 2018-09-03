@@ -2,8 +2,6 @@ import re, string
 from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import word_tokenize
 
-from estnltk import Text
-
 
 class Cleaners(object):
     """class for collecting cleaning methods"""
@@ -12,7 +10,7 @@ class Cleaners(object):
         if isinstance(stopwords, list):
             self.stopwords = stopwords
         elif isinstance(stopwords, str):
-            self._load_stopwords(self.stopwords)
+            self._load_stopwords(stopwords)
         else:
             self.stopwords = None
 
@@ -32,7 +30,7 @@ class Cleaners(object):
         self.stopwords = filename
         self.stopwords = stopwords_list
 
-    def stem(self, text, lang, as_list=False):
+    def stem(self, text, lang, as_list=True):
         """stems text using porter stemmer from nltk
 
                 Parameters
@@ -53,56 +51,22 @@ class Cleaners(object):
         for word in text:
             stemmed_text.append(stemmer.stem(word))
 
-        return stemmed_text
+        if as_list:
+            return stemmed_text
+        return ' '.join(stemmed_text)
 
-    def lemmatize_et(self, text, as_list=False):
-        """lemmatizes text using estnltk lemmatizer
 
-        Parameters
-        ----------
-        text : string of text to be lemmatized
-        as_list : boolean, return results as lemmatized token string (True) or concatenate it one string?
-
-        Returns
-        -------
-        string / list of lemmatized text
-        """
-
-        # needed for Text to work, otherwise after newline/tab no text is analyzed
-        text = text.replace('\n', ' ')
-        text = text.replace('\t', ' ')
-
-        text = Text(text)
-        # text.analyse('morphology')
-        lemmas = text.lemmas
-        word_forms = text.forms
-        lemmatized_text = []
-
-        for i, lemma in enumerate(lemmas):
-            if word_forms[i] == 'neg o' and 'olema' in lemmas[i]:
-                lemmatized_text.append('pole')
-            else:
-                lemmatized_text.append(lemma)
-
-        if as_list is False:
-            lemmatized_text = ' '.join(lemmatized_text)
-
-        return lemmatized_text
-
-    def tokenize(self, text, tokenizer='estnltk'):
-        """tokenize text using Estnltk or nltk
+    def tokenize(self, text):
+        """tokenize text using nltk
 
              Parameters
              ----------
              text : string of text to be tokenized
-             lang : string, whic tokenizer to use, default 'estnltk', other 'nltk'
 
              Returns
              -------
              list of strings (tokens)"""
-        if tokenizer == 'estnltk':
-            text = Text(text)
-            return text.word_texts
+
         # nltk tokenizer
         return word_tokenize(text)
 
@@ -188,6 +152,7 @@ class Cleaners(object):
         text : string/list of strings of text where excess spaces is to be removed
         patter: regex pattern which is replaced
         replace: string with what pattern is to be replaced
+        escape_regex: escape regex pattern and evaluate it literally
 
         Returns
         -------
