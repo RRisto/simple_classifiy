@@ -104,8 +104,6 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
         try:
             if (type(texts) is list or type(texts) is pd.core.series.Series):
                 labels = self.classifier.predict(texts, k=k_best)
-                # todo
-                # result_temp=['__label__'+lbl[0]+' ' for lbl in labels]
                 result_temp = [lbl[0] for lbl in labels]
                 self.result = np.array(result_temp)
         except:
