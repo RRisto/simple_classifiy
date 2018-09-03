@@ -2,12 +2,10 @@ import pickle
 
 from gensim.models import LdaMulticore
 from gensim.models.ldamodel import LdaModel
+from gensim.models.coherencemodel import CoherenceModel
 from gensim.corpora.dictionary import Dictionary
 import pyLDAvis.gensim
-from gensim.models.coherencemodel import CoherenceModel
 
-
-##################
 
 class CustomLda(object):
     def __init__(self, data=None, dictionary=None):
@@ -18,8 +16,6 @@ class CustomLda(object):
         self.iterations = None
         self.random_state = None
         self.dictionary = dictionary
-        # if dictionary is not None:
-        #     self.dictionary = dictionary
         if self.data is not None:
             if self.dictionary is None:
                 self.dictionary = Dictionary(self.data)
