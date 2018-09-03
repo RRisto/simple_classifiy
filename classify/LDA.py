@@ -52,7 +52,8 @@ class CustomLda(object):
     def train(self, num_topics, iterations=1500, random_state=1,
               distributed=False, chunksize=2000, passes=1, update_every=1, alpha='symmetric',
               eta=None, decay=0.5, offset=1.0, eval_every=10, gamma_threshold=0.001,
-              minimum_probability=0.01, ns_conf=None, minimum_phi_value=0.01, per_word_topics=False, workers=1):
+              minimum_probability=0.01, ns_conf=None, minimum_phi_value=0.01, per_word_topics=False,
+              workers=1):
         """train lda model. If workers >1, goes multicore"""
 
         self.distributed = distributed

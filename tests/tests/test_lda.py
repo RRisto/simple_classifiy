@@ -27,6 +27,17 @@ class TestLda(unittest.TestCase):
         lda.train(2)
         self.assertEqual(lda.num_topics, 2)
 
+    def test_train_multicore(self):
+        lda=CustomLda(self.text)
+        lda.train(2, workers=2)
+        self.assertEqual(lda.num_topics, 2)
+
+    def test_get_coherence(self):
+        lda = CustomLda(self.text)
+        lda.train(2)
+        coherence=lda.get_coherence()
+        self.assertEqual(type(coherence),np.float64)
+
     def test_get_topic(self):
         lda = CustomLda(self.text)
         lda.train(2)
@@ -61,6 +72,7 @@ class TestLda(unittest.TestCase):
         lda.save_lda(filename)
         self.assertTrue(os.path.isfile(filename))
 
+
     def test_pickle_unpickle(self):
         lda = CustomLda(self.text)
         lda.train(2)
@@ -70,3 +82,11 @@ class TestLda(unittest.TestCase):
         self.assertEqual(lda.corpus, lda2.corpus)
         self.assertEqual(lda.data, lda2.data)
         self.assertEqual(lda.dictionary, lda2.dictionary)
+
+    def test_predict_topic(self):
+        lda = CustomLda(self.text)
+        lda.train(2)
+        docs=[['good', 'one'],['bad','one']]
+        topics=lda.predict_topic(docs)
+        self.assertEqual(type(topics), list)
+        self.assertEqual(len(topics),2)
