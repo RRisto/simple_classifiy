@@ -266,10 +266,10 @@ class ClassifierCv(object):
             """
         proba_method = None
 
-        if callable(getattr(classifier, "predict_proba", None)):
-            proba_method = "predict_proba"
-        elif callable(getattr(classifier, "decision_function", None)):
+        if callable(getattr(classifier, "decision_function", None)):
             proba_method = "decision_function"
+        elif callable(getattr(classifier, "predict_proba", None)):
+            proba_method = "predict_proba"
         return proba_method
 
     def train(self, roc_auc=True):

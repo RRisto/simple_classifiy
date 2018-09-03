@@ -57,8 +57,11 @@ class TestClassifierCv(unittest.TestCase):
         cf_cv.perform_random_search(param_dist)
 
         params = cf_cv.get_top_random_search_parameters(1)
+        params_print=cf_cv.print_top_random_search(1)
+
         self.assertEqual(type(params), dict)
         self.assertEqual(len(params), 1)
+        self.assertEqual(params_print, None)
 
     def test_prepare_cv(self):
         cf_cv = ClassifierCv(self.labels, self.texts)
@@ -85,6 +88,30 @@ class TestClassifierCv(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.test_dir, name + 'prec_recall.png')))
         self.assertTrue(os.path.isfile(os.path.join(self.test_dir, name + '.xlsx')))
         self.assertTrue(os.path.isfile(os.path.join(self.test_dir, name + '_average.xlsx')))
+        self.assertEqual(type(cf_cv.roc_auc), dict)
+        self.assertEqual(type(cf_cv.tpr), dict)
+        self.assertEqual(type(cf_cv.fpr), dict)
+        self.assertEqual(type(cf_cv.metrics_average_df), pd.DataFrame)
+        self.assertEqual(type(cf_cv.metrics_df), pd.DataFrame)
+        self.assertEqual(type(cf_cv.metrics_per_class), list)
+        self.assertEqual(type(cf_cv.metrics_average), list)
+
+    def test_train_save_metrics_no_paths(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                 metric, name,
+                                None,
+                                 None)
+
+        self.assertFalse(os.path.isfile(os.path.join(self.test_dir, name + '_' + metric + '.png')))
+        self.assertFalse(os.path.isfile(os.path.join(self.test_dir, name + 'ROC_AUC.png')))
+        self.assertFalse(os.path.isfile(os.path.join(self.test_dir, name + 'prec_recall.png')))
+        self.assertFalse(os.path.isfile(os.path.join(self.test_dir, name + '.xlsx')))
+        self.assertFalse(os.path.isfile(os.path.join(self.test_dir, name + '_average.xlsx')))
         self.assertEqual(type(cf_cv.roc_auc), dict)
         self.assertEqual(type(cf_cv.tpr), dict)
         self.assertEqual(type(cf_cv.fpr), dict)
@@ -145,13 +172,28 @@ class TestClassifierCv(unittest.TestCase):
         metric = 'f1'
         cf_cv.train_save_metrics([('vect', CountVectorizer()),
                                   ('tfidf', TfidfTransformer()),
-                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                  ('clf', MultinomialNB(alpha=.05))],
                                  metric, name,
                                  self.test_dir,
                                  self.test_dir)
 
         filename = os.path.join(self.test_dir, name + '_metric_boxplot.png')
         cf_cv.make_metric_boxplot(metric='f1',savefile=filename)
+        self.assertTrue(os.path.isfile(filename))
+
+    def test_make_roc_auc_plot(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05))],
+                                 metric, name,
+                                 self.test_dir,
+                                 self.test_dir)
+
+        filename = os.path.join(self.test_dir, name + '_roc_auc_plot.png')
+        cf_cv.make_roc_auc_plot(savefile=filename)
         self.assertTrue(os.path.isfile(filename))
 
     def test_plot_confusion_matrix(self):
@@ -167,6 +209,24 @@ class TestClassifierCv(unittest.TestCase):
 
         filename = os.path.join(self.test_dir, name + '_confusion_matrix.png')
         cf_cv.plot_confusion_matrix(savefile=filename)
+        self.assertTrue(os.path.isfile(filename))
+
+    def test_plot_confusion_matrix_eval_data_normalize(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05)), ],
+                                 metric, name,
+                                 self.test_dir,
+                                 self.test_dir)
+
+        filename = os.path.join(self.test_dir, name + 'eval_confusion_matrix.png')
+        cf_cv.labels_eval_real=['pos','neg','neg','neg']
+        cf_cv.labels_eval_predicted=['pos','neg','neg','neg']
+
+        cf_cv.plot_confusion_matrix(savefile=filename,normalize=True,use_evaluation_data=True)
         self.assertTrue(os.path.isfile(filename))
 
     def test_calc_evaluation_report(self):
