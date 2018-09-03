@@ -7,9 +7,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
 from imblearn.pipeline import Pipeline
 
-from classify.FasttextClassifier import FasttextClassifier
-from classify.ClassifierCv import ClassifierCv
-from classify.EnsembleClassifier import EnsembleClassifier
+from TextClass.FasttextClassifier import FasttextClassifier
+from TextClass.ClassifierCv import ClassifierCv
+from TextClass.EnsembleClassifier import EnsembleClassifier
 from tests.test_data.texts import Texts
 
 

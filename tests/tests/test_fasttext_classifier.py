@@ -2,8 +2,8 @@ import tempfile, unittest, shutil, os
 
 import pandas as pd
 
-from classify.ClassifierCv import ClassifierCv
-from classify.FasttextClassifier import FasttextClassifier
+from TextClass.ClassifierCv import ClassifierCv
+from TextClass.FasttextClassifier import FasttextClassifier
 from tests.test_data.texts import Texts
 
 

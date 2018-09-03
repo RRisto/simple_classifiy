@@ -2,7 +2,7 @@ import unittest, os, shutil, tempfile
 
 import numpy as np
 
-from classify.LDA import CustomLda
+from TextClass.LDA import CustomLda
 from tests.test_data.texts import Texts
 
 

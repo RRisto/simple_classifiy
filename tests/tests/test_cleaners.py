@@ -1,5 +1,5 @@
 import unittest
-from classify.Cleaners import Cleaners
+from TextClass.Cleaners import Cleaners
 import os
 
 
