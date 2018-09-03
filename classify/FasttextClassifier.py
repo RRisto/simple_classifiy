@@ -152,7 +152,6 @@ class FasttextClassifier(BaseEstimator, ClassifierMixin):
         except:
             print("Error in input dataset.. please see if the file/list of sentences is of correct format")
             sys.exit(-1)
-
         return (self.result)
 
     def loadpretrained(self, filename):
