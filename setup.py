@@ -13,14 +13,14 @@ setup(name='TextClass',
         'Programming Language :: Python :: 3.5',
         'Topic :: Text Processing :: General',
       ],
-      keywords='nlp cleaning text',
+      keywords='nlp classification',
       url='',
       author='Risto Hinno',
       author_email='ristohinno@gmail.com',
       license='MIT',
       packages=['TextClass'],
       install_requires=[
-          'nltk','langdetect','pytest'
+          'nltk','sklearn','imblearn','gensim','matplotlib','pyldavis','pandas',''
       ],
       test_suite='pytest-runner',
       tests_require=['pytest'],

@@ -12,7 +12,6 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc, precision_recall_curve, \
     average_precision_score, confusion_matrix, classification_report
-# from sklearn.pipeline import Pipeline
 from imblearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
 
