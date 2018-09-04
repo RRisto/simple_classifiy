@@ -15,6 +15,6 @@ Repo for simple text classification and overview. Includes following features:
 pip install git+https://github.com/RRisto/simple_classifiy
 ```
 
-For examples see folder "examples".
+For examples see folder [examples](https://github.com/RRisto/simple_classifiy/tree/master/examples).
         
 Package is based on my [Master Thesis](https://comserv.cs.ut.ee/home/files/Hinno_it_mitteinformaatikutele_2018.pdf?study=ATILoputoo&reference=ACE302BBE243C214CBD2CD5728FCCC0297A76F81). And is not actively developed. Add features, fix bugs when necessary.
