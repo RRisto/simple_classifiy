@@ -24,7 +24,6 @@ class TestCleaners(unittest.TestCase):
         for line in stopwords:
             stopwords_list.extend(line.strip().split(','))
 
-        # remove duplicates
         stopwords_list = list(set(stopwords_list))
         stopwords_list.remove('')
         stopwords_list = [stopword.strip() for stopword in stopwords_list]
@@ -41,6 +40,11 @@ class TestCleaners(unittest.TestCase):
         cl = Cleaners()
         tokens = cl.tokenize('mina olen pikk poiss')
         self.assertEqual(tokens, ['mina', 'olen', 'pikk', 'poiss'])
+
+    def test_tokenize_list(self):
+        cl = Cleaners()
+        tokens = cl.tokenize([['mina olen'], ['pikk poiss']])
+        self.assertEqual(tokens, [['mina', 'olen'], ['pikk', 'poiss']])
 
     def test_remove_stopwords_return_list(self):
         cl = Cleaners()

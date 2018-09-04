@@ -56,19 +56,26 @@ class Cleaners(object):
         return ' '.join(stemmed_text)
 
 
-    def tokenize(self, text):
+    def tokenize(self, texts):
         """tokenize text using nltk
 
              Parameters
              ----------
-             text : string of text to be tokenized
+             texts : string of text to be tokenized
 
              Returns
              -------
              list of strings (tokens)"""
 
         # nltk tokenizer
-        return word_tokenize(text)
+
+        if isinstance(texts, list):
+            tokenized = []
+            for text in texts:
+                tokenized.append(word_tokenize(text[0]))
+            return tokenized
+
+        return word_tokenize(texts)
 
     def remove_stopwords(self, tokens, stopwords=None, return_string=False, min_len_tokens_kept=3):
         """remove stopwords from token list
