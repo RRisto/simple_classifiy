@@ -9,17 +9,14 @@ class EnsembleClassifier(BaseEstimator, ClassifierMixin):
     Ensemble classifier for scikit-learn estimators. Allows different pipelines for different estimators.
     Need for this separate class comes from FasttextClassifier, because it doesn't work with default sklearn
     ensemble classifier
-
     Parameters
     ----------
-
     clf : `iterable`
       A list of scikit-learn classifier objects.
     weights : `list` (default: `None`)
       If `None`, the majority rule voting will be applied to the predicted class labels.
         If a list of weights (`float` or `int`) is provided, the averaged raw probabilities (via `predict_proba`)
         will be used to determine the most confident class label.
-
     """
 
     def __init__(self, clfs, weights=None):
@@ -29,15 +26,12 @@ class EnsembleClassifier(BaseEstimator, ClassifierMixin):
     def fit(self, X, y):
         """
         Fit the scikit-learn estimators.
-
         Parameters
         ----------
-
         X : numpy array, shape = [n_samples, n_features]
             Training data
         y : list or numpy array, shape = [n_samples]
             Class labels
-
         """
         for clf in self.clfs:
             clf.fit(X, y)
@@ -46,17 +40,12 @@ class EnsembleClassifier(BaseEstimator, ClassifierMixin):
         """
         Parameters
         ----------
-
         X : numpy array, shape = [n_samples, n_features]
-
         Returns
         ----------
-
         maj : list or numpy array, shape = [n_samples]
             Predicted class labels by majority rule
-
         """
-
         self.classes_ = np.asarray([clf.predict(X) for clf in self.clfs])
         if self.weights:
             avg = self.predict_proba(X)
@@ -71,19 +60,14 @@ class EnsembleClassifier(BaseEstimator, ClassifierMixin):
         return maj
 
     def predict_proba(self, X):
-
         """
         Parameters
         ----------
-
         X : numpy array, shape = [n_samples, n_features]
-
         Returns
         ----------
-
         avg : list or numpy array, shape = [n_samples, n_probabilities]
             Weighted average probability for each class per sample.
-
         """
         self.probas_ = [clf.predict_proba(X) for clf in self.clfs]
         avg = np.average(self.probas_, axis=0, weights=self.weights)
