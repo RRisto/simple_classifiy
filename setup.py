@@ -6,7 +6,7 @@ def readme():
 
 setup(name='TextClass',
       version='0.1',
-      description='Classes and methods for cleaning, cleaning and classifiyng texts',
+      description='Classes and methods for cleaning, cleaning and classifyng texts',
       long_description=readme(),
       classifiers=[
         'Development Status :: 4 - Beta',
