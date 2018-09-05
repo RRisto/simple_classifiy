@@ -740,13 +740,14 @@ class ClassifierCv(object):
 
     def plot_acc_vs_nsamples(self, metric_name='f1', savefile=None):
         metric=pd.DataFrame(self.get_one_metric_cv(metric_name=metric_name).mean(1))
-        nsamples=pd.DataFrame(pd.DataFrame(self.labels)['class'].value_counts())
+        nsamples=pd.DataFrame(pd.DataFrame(self.labels).ix[:,0].value_counts())
         metric=metric.merge(nsamples, left_index=True, right_index=True)
-        metric.plot.scatter(x=0, y='class')
+        metric.columns=['acc','nsamples']
+        metric.plot.scatter(x='acc', y='nsamples')
 
-        z = np.polyfit(metric[0], metric['class'], 1)
+        z = np.polyfit(metric['acc'], metric['nsamples'], 1)
         p = np.poly1d(z)
-        plt.plot(metric[0], p(metric[0]), "r--")
+        plt.plot(metric['acc'], p(metric['acc']), "r--")
         plt.xlabel(metric_name)
         plt.ylabel('number of samples')
 
