@@ -8,7 +8,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.naive_bayes import MultinomialNB
 
 from TextClass.ClassifierCv import ClassifierCv
-from tests.test_data.texts import Texts
+from tests.tests.test_data.texts import Texts
 
 
 class TestClassifierCv(unittest.TestCase):
