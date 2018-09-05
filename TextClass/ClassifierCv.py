@@ -748,6 +748,9 @@ class ClassifierCv(object):
         z = np.polyfit(metric['acc'], metric['nsamples'], 1)
         p = np.poly1d(z)
         plt.plot(metric['acc'], p(metric['acc']), "r--")
+        for i, txt in enumerate(metric.index):
+            plt.annotate(txt, (metric['acc'][i], p(metric['acc'])[i]))
+
         plt.xlabel(metric_name)
         plt.ylabel('number of samples')
 
