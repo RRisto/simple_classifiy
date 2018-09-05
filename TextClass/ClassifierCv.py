@@ -738,6 +738,21 @@ class ClassifierCv(object):
 
         return classification_report(self.labels_eval_real, self.labels_eval_predicted)
 
+    def plot_acc_vs_nsamples(self, metric_name='f1', savefile=None):
+        metric=pd.DataFrame(self.get_one_metric_cv(metric_name=metric_name).mean(1))
+        nsamples=pd.DataFrame(pd.DataFrame(self.labels)['class'].value_counts())
+        metric=metric.merge(nsamples, left_index=True, right_index=True)
+        metric.plot.scatter(x=0, y='class')
+
+        z = np.polyfit(metric[0], metric['class'], 1)
+        p = np.poly1d(z)
+        plt.plot(metric[0], p(metric[0]), "r--")
+        plt.xlabel(metric_name)
+        plt.ylabel('number of samples')
+
+        if savefile:
+            plt.savefig(savefile)
+
     def pickle(self, filename):
         """save class instance to file
         -INPUT:

@@ -275,6 +275,20 @@ class TestClassifierCv(unittest.TestCase):
         self.assertEqual(len(labels['neg'].values), 2)
         self.assertEqual(type(labels['neg'].values[0]), np.float64)
 
+    def test_plot_acc_vs_nsamples(self):
+        cf_cv = ClassifierCv(self.labels, self.texts)
+        name = 'MultinomialNB'
+        metric = 'f1'
+        cf_cv.train_save_metrics([('vect', CountVectorizer()),
+                                  ('tfidf', TfidfTransformer()),
+                                  ('clf', MultinomialNB(alpha=.05))],
+                                 metric, name,
+                                 self.test_dir,
+                                 self.test_dir)
+        savefile=os.path.join(self.test_dir,'f1_vs_nsamples.png')
+        cf_cv.plot_acc_vs_nsamples('f1',savefile)
+        self.assertTrue(os.path.isfile(savefile))
+
     def test_pickle(self):
         cf_cv = ClassifierCv(self.labels, self.texts)
         name = 'MultinomialNB'
