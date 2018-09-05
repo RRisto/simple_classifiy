@@ -286,7 +286,7 @@ class TestClassifierCv(unittest.TestCase):
                                  self.test_dir,
                                  self.test_dir)
         savefile=os.path.join(self.test_dir,'f1_vs_nsamples.png')
-        cf_cv.plot_acc_vs_nsamples('f1',savefile)
+        cf_cv.plot_acc_vs_nsamples('f1',savefile=savefile)
         self.assertTrue(os.path.isfile(savefile))
 
     def test_pickle(self):

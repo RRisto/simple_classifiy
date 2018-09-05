@@ -738,16 +738,27 @@ class ClassifierCv(object):
 
         return classification_report(self.labels_eval_real, self.labels_eval_predicted)
 
-    def plot_acc_vs_nsamples(self, metric_name='f1', savefile=None):
+    def plot_acc_vs_nsamples(self, metric_name='f1', trendline=False, savefile=None):
+        """plot number of samples vs accuracy
+        -INPUT:
+            -metric_name: string, name of metric to be used for accuracy (f1, precision, recall
+            -trendline: boolean, add trendline to plot
+            -savefile: string, if exists saves plot with name this name
+        -OUTPUT:
+            plot with number of samples vs accuracy
+            """
         metric=pd.DataFrame(self.get_one_metric_cv(metric_name=metric_name).mean(1))
         nsamples=pd.DataFrame(pd.DataFrame(self.labels).ix[:,0].value_counts())
         metric=metric.merge(nsamples, left_index=True, right_index=True)
         metric.columns=['acc','nsamples']
         metric.plot.scatter(x='acc', y='nsamples')
-
+        
         z = np.polyfit(metric['acc'], metric['nsamples'], 1)
         p = np.poly1d(z)
-        plt.plot(metric['acc'], p(metric['acc']), "r--")
+
+        if trendline:
+            plt.plot(metric['acc'], p(metric['acc']), "r--")
+
         for i, txt in enumerate(metric.index):
             plt.annotate(txt, (metric['acc'][i], p(metric['acc'])[i]))
 
