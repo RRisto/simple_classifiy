@@ -3,7 +3,7 @@ import unittest, os, shutil, tempfile
 import numpy as np
 
 from TextClass.LDA import CustomLda
-from tests.test_data.texts import Texts
+from tests.tests.test_data.texts import Texts
 
 
 class TestLda(unittest.TestCase):

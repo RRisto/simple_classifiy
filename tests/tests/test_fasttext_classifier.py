@@ -4,7 +4,7 @@ import pandas as pd
 
 from TextClass.ClassifierCv import ClassifierCv
 from TextClass.FasttextClassifier import FasttextClassifier
-from tests.test_data.texts import Texts
+from tests.tests.test_data.texts import Texts
 
 
 class TestFasttextClassifier(unittest.TestCase):

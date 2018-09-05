@@ -10,7 +10,7 @@ from imblearn.pipeline import Pipeline
 from TextClass.FasttextClassifier import FasttextClassifier
 from TextClass.ClassifierCv import ClassifierCv
 from TextClass.EnsembleClassifier import EnsembleClassifier
-from tests.test_data.texts import Texts
+from tests.tests.test_data.texts import Texts
 
 
 class TestEnsembleClassifier(unittest.TestCase):
