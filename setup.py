@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='TextClass',
-      version='0.1',
+      version='0.2',
       description='Classes and methods for cleaning, cleaning and classifyng texts',
       long_description=readme(),
       classifiers=[

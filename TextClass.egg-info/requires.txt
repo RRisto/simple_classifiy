@@ -8,3 +8,4 @@ pandas
 pytest
 openpyxl
 mock
+fasttext==0.8.3
