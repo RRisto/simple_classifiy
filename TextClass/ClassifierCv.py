@@ -32,8 +32,14 @@ class ClassifierCv(object):
     """class for general classifier"""
 
     def __init__(self, data_labels, data_text):
-        self.text = data_text
-        self.labels = data_labels
+        """initalizes classifier object
+        -INPUT:
+            -data_labels: series, labels for classes
+            -data_text: series, texts for classification
+        -OUTPUT:
+            -initialized classifier object"""
+        self.text = data_text.reset_index()
+        self.labels = data_labels.reset_index()
 
         if data_labels is not None:  # should be none only if unpickle
             # turn into binary labels
