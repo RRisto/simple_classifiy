@@ -1,0 +1,14 @@
+setup.cfg
+setup.py
+TextClass/ClassifierCv.py
+TextClass/Cleaners.py
+TextClass/EnsembleClassifier.py
+TextClass/FasttextClassifier.py
+TextClass/LDA.py
+TextClass/__init__.py
+TextClass.egg-info/PKG-INFO
+TextClass.egg-info/SOURCES.txt
+TextClass.egg-info/dependency_links.txt
+TextClass.egg-info/not-zip-safe
+TextClass.egg-info/requires.txt
+TextClass.egg-info/top_level.txt

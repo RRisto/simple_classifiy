@@ -1,0 +1,9 @@
+nltk
+sklearn
+imblearn
+gensim
+matplotlib
+pyldavis
+pandas
+pytest
+openpyxl
