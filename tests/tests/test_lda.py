@@ -1,9 +1,12 @@
-import unittest, os, shutil, tempfile
+import os
+import shutil
+import tempfile
+import unittest
 
 import numpy as np
 
 from TextClass.LDA import CustomLda
-from tests.tests.test_data.texts import Texts
+from test_data.texts import Texts
 
 
 class TestLda(unittest.TestCase):

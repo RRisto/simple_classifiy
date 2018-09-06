@@ -1,14 +1,16 @@
-import tempfile, os, unittest, shutil
+import os
+import shutil
+import tempfile
+import unittest
 
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import SGDClassifier
 from sklearn.naive_bayes import MultinomialNB
 
 from TextClass.ClassifierCv import ClassifierCv
-from tests.tests.test_data.texts import Texts
+from test_data.texts import Texts
 
 
 class TestClassifierCv(unittest.TestCase):

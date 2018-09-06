@@ -1,10 +1,13 @@
-import tempfile, unittest, shutil, os
+import os
+import shutil
+import tempfile
+import unittest
 
 import pandas as pd
 
 from TextClass.ClassifierCv import ClassifierCv
 from TextClass.FasttextClassifier import FasttextClassifier
-from tests.tests.test_data.texts import Texts
+from test_data.texts import Texts
 
 
 class TestFasttextClassifier(unittest.TestCase):
@@ -17,12 +20,10 @@ class TestFasttextClassifier(unittest.TestCase):
         self.texts = texts
         self.labels = df['class']
 
-        # temp dir
         self.test_dir = tempfile.mkdtemp()
         self.output = os.path.join(self.test_dir, 'model.ft')
 
     def tearDown(self):
-        # Remove the directory after the test
         shutil.rmtree(self.test_dir)
 
     def test_init(self):
