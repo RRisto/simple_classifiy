@@ -738,7 +738,7 @@ class ClassifierCv(object):
 
         return classification_report(self.labels_eval_real, self.labels_eval_predicted)
 
-    def plot_acc_vs_nsamples(self, metric_name='f1', trendline=False, savefile=None):
+    def plot_acc_vs_nsamples(self, metric_name='f1', trendline=True, savefile=None):
         """plot number of samples vs accuracy
         -INPUT:
             -metric_name: string, name of metric to be used for accuracy (f1, precision, recall
@@ -753,14 +753,14 @@ class ClassifierCv(object):
         metric.columns=['acc','nsamples']
         metric.plot.scatter(x='acc', y='nsamples')
         
-        z = np.polyfit(metric['acc'], metric['nsamples'], 1)
+        z = np.polyfit(metric['nsamples'], metric['acc'], 1)
         p = np.poly1d(z)
 
         if trendline:
-            plt.plot(metric['acc'], p(metric['acc']), "r--")
+            plt.plot(metric['nsamples'], p(metric['nsamples']), "r--")
 
         for i, txt in enumerate(metric.index):
-            plt.annotate(txt, (metric['acc'][i], p(metric['acc'])[i]))
+            plt.annotate(txt, (metric['nsamples'][i], p(metric['nsamples'])[i]))
 
         plt.xlabel(metric_name)
         plt.ylabel('number of samples')
