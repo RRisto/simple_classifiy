@@ -751,7 +751,7 @@ class ClassifierCv(object):
         nsamples=pd.DataFrame(pd.DataFrame(self.labels).ix[:,0].value_counts())
         metric=metric.merge(nsamples, left_index=True, right_index=True)
         metric.columns=['acc','nsamples']
-        metric.plot.scatter(x='acc', y='nsamples')
+        metric.plot.scatter(x='nsamples', y='acc')
         
         z = np.polyfit(metric['nsamples'], metric['acc'], 1)
         p = np.poly1d(z)
