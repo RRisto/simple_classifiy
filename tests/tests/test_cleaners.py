@@ -14,7 +14,7 @@ class TestCleaners(unittest.TestCase):
         self.assertIsNone(cl.stopwords)
 
     def test_initialization_with_stopwords_from_file(self):
-        stopwords_filename='test/stopwords/stopwords.txt'
+        stopwords_filename='tests/stopwords/stopwords.txt'
         cl = Cleaners(stopwords_filename)
 
         with open(stopwords_filename) as file:
@@ -31,7 +31,7 @@ class TestCleaners(unittest.TestCase):
 
     def test_load_stopwords(self):
         cl = Cleaners(None)
-        cl._load_stopwords(os.path.join(os.getcwd(), 'test/stopwords/stopwords.txt'))
+        cl._load_stopwords(os.path.join(os.getcwd(), 'tests/stopwords/stopwords.txt'))
         self.assertEqual(type(cl.stopwords), list)
         self.assertEqual(len(cl.stopwords), 2)
 
@@ -56,7 +56,7 @@ class TestCleaners(unittest.TestCase):
         self.assertEqual(clean, 'mina pikk poiss')
 
     def test_remove_stopwords_default(self):
-        cl = Cleaners('test/stopwords/stopwords.txt')
+        cl = Cleaners('tests/stopwords/stopwords.txt')
         clean = cl.remove_stopwords(['yes', 'very', 'no'], return_string=True)
         self.assertEqual(clean, 'very')
 
