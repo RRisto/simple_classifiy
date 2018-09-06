@@ -38,8 +38,8 @@ class ClassifierCv(object):
             -data_text: series, texts for classification
         -OUTPUT:
             -initialized classifier object"""
-        self.text = data_text.reset_index()
-        self.labels = data_labels.reset_index()
+        self.text = data_text.reset_index(drop=True)
+        self.labels = data_labels.reset_index(drop=True)
 
         if data_labels is not None:  # should be none only if unpickle
             # turn into binary labels
