@@ -1,4 +1,4 @@
-##Simple text classifiers
+## Simple text classifiers
 
 Repo for simple text classification and overview. Includes following features:
  - Text cleaning (stopwords removal, stemming etc.)
