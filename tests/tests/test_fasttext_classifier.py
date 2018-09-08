@@ -58,8 +58,8 @@ class TestFasttextClassifier(unittest.TestCase):
         ft_clf = FasttextClassifier(output=self.output)
         ft_clf.fit(self.texts, self.labels)
         probas = ft_clf.predict_proba(['very bad', 'very good'])
-        self.assertTrue(probas[0][0] < probas[0][1])
-        self.assertTrue(probas[1][0] > probas[1][1])
+        self.assertTrue(probas[0][0] <= probas[0][1])
+        self.assertTrue(probas[1][0] >= probas[1][1])
 
     def test_predict_proba_wrong_type(self):
         ft_clf = FasttextClassifier(output=self.output)
