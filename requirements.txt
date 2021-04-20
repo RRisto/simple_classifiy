@@ -38,7 +38,7 @@ pandas==0.23.4
 pathlib2==2.3.2
 pbr==4.2.0
 pluggy==0.7.1
-py==1.6.0
+py==1.10.0
 pyahocorasick==1.1.6
 pyLDAvis==2.1.2
 pyparsing==2.2.0
