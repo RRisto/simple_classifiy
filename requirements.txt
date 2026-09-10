@@ -22,7 +22,7 @@ html5lib==1.0.1
 imbalanced-learn==0.3.3
 imblearn==0.0
 jdcal==1.4
-Jinja2==2.10
+Jinja2==2.11.3
 jmespath==0.9.3
 joblib==1.2.0
 kiwisolver==1.0.1
