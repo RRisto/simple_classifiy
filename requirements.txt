@@ -16,7 +16,7 @@ estnltk==1.4.1
 et-xmlfile==1.0.1
 fasttext==0.8.3
 funcy==1.10.3
-future==0.16.0
+future==1.0.0
 gensim==3.5.0
 html5lib==1.0.1
 imbalanced-learn==0.3.3
